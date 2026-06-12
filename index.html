@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///C:/Users/EstacionDulce/Downloads/rendiciones_v2_2.html -->
+<!-- saved from url=(0062)file:///C:/Users/EstacionDulce/Downloads/rendiciones_v3_1.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,6 +18,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .error-box h3{color:#c0392b;margin-bottom:8px}
 .error-box p{font-size:13px;color:#7a3535;margin-bottom:12px}
 .retry-btn{padding:8px 16px;background:#1a1a18;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+
+/* LOGIN */
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-card{background:#fff;border:1px solid #e0dfd8;border-radius:16px;padding:28px 24px;width:100%;max-width:360px}
+.login-logo{font-size:22px;font-weight:700;margin-bottom:4px;text-align:center}
+.login-sub{font-size:13px;color:#6b6b67;text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-label{font-size:12px;font-weight:600;color:#6b6b67;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.login-input{width:100%;padding:11px 14px;font-size:15px;border:1.5px solid #e0dfd8;border-radius:8px;background:#fff;color:#1a1a18;outline:none}
+.login-input:focus{border-color:#1a1a18}
+.login-btn{width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:#1a1a18;color:#fff;margin-top:6px}
+.login-btn:active{opacity:.85}
+.login-error{background:#fde8e8;color:#c0392b;border:1px solid #f5b7b7;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.logout-btn{padding:6px 12px;font-size:12px;border:1px solid #e0dfd8;border-radius:6px;cursor:pointer;background:#fff;color:#6b6b67;font-weight:500}
 
 /* SELECTOR */
 .sel-wrap{padding:24px;max-width:640px;margin:0 auto}
@@ -124,6 +138,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
+<!-- LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">🚚 Estación Dulce</div>
+      <div class="login-sub">Sistema de Rendiciones</div>
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+      <div class="login-field">
+        <label class="login-label">Usuario</label>
+        <input class="login-input" id="login-usuario" type="text" placeholder="Ej: R10 o admin" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label class="login-label">Contraseña</label>
+        <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
+      </div>
+      <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div class="screen" id="screen-loading">
   <div class="loading-wrap">
@@ -133,38 +167,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <!-- SELECTOR -->
-<div class="screen active" id="screen-sel">
+<div class="screen" id="screen-sel">
   <div class="sel-wrap">
-    <div class="sel-title" id="sel-titulo">Rendición — 10/06/2026</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="sel-title" id="sel-titulo">Rendición</div>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
     <div class="sel-sub">Seleccioná el repartidor para cargar su rendición</div>
-    <div class="rep-grid" id="rep-grid"><div class="rep-card" onclick="abrirRep(&#39;R10&#39;)">
-      <div class="avatar">KU</div>
-      <div>
-        <div class="rep-nombre">Kuki</div>
-        <div class="rep-codigo">R10 · Sergio Benavidez</div>
-        <div class="rep-monto">Total: $1.958.234</div>
-        <div class="rep-monto" style="font-size:11px;color:#8a6200;margin-top:2px">Pendiente: $197.655</div>
-        <span class="badge badge-pend">Pendiente</span>
-      </div>
-    </div><div class="rep-card" onclick="abrirRep(&#39;R12&#39;)">
-      <div class="avatar">LE</div>
-      <div>
-        <div class="rep-nombre">Leonel</div>
-        <div class="rep-codigo">R12 · Leonel Heredia</div>
-        <div class="rep-monto">Total: $5.930.586</div>
-        <div class="rep-monto" style="font-size:11px;color:#8a6200;margin-top:2px">Pendiente: $2.062.082</div>
-        <span class="badge badge-pend">Pendiente</span>
-      </div>
-    </div><div class="rep-card" onclick="abrirRep(&#39;R16&#39;)">
-      <div class="avatar">MA</div>
-      <div>
-        <div class="rep-nombre">Mauro</div>
-        <div class="rep-codigo">R16 · Mauro Benavidez</div>
-        <div class="rep-monto">Total: $3.892.727</div>
-        <div class="rep-monto" style="font-size:11px;color:#8a6200;margin-top:2px">Pendiente: $358.772</div>
-        <span class="badge badge-pend">Pendiente</span>
-      </div>
-    </div></div>
+    <div class="rep-grid" id="rep-grid"></div>
     <div class="resumen-global" id="resumen-global" style="display:none">
       <div class="rg-title">Resumen del día</div>
       <div class="rg-grid" id="rg-grid"></div>
@@ -236,6 +246,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script>
 // ============================================================
+// USUARIOS
+// ============================================================
+const USUARIOS = {
+  'R10':   { pass: 'kuki2025',   codigo: 'R10',   esAdmin: false },
+  'R12':   { pass: 'leonel2025', codigo: 'R12',   esAdmin: false },
+  'R16':   { pass: 'mauro2025',  codigo: 'R16',   esAdmin: false },
+  'admin': { pass: 'dulce2025',  codigo: 'admin', esAdmin: true  },
+};
+
+let usuarioActual = null;
+
+function doLogin() {
+  const usuario = document.getElementById('login-usuario').value.trim().toUpperCase();
+  const pass = document.getElementById('login-pass').value.trim();
+  const errorEl = document.getElementById('login-error');
+
+  // Buscar usuario (case-insensitive)
+  const key = Object.keys(USUARIOS).find(k => k.toUpperCase() === usuario);
+  const u = key ? USUARIOS[key] : null;
+
+  if (!u || u.pass !== pass) {
+    errorEl.style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+  usuarioActual = u;
+  showScreen('screen-loading');
+  cargarDatos();
+}
+
+function doLogout() {
+  usuarioActual = null;
+  document.getElementById('login-usuario').value = '';
+  document.getElementById('login-pass').value = '';
+  showScreen('screen-login');
+}
+
+// ============================================================
 // CONFIGURACIÓN — CAMBIÁ SOLO ESTA URL
 // ============================================================
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6YsKihCeOIDtamdsMTSukRDFW1zp1uOTas3KrT_a_0DL_Uf92dawkTmdqf2vNGBMS/exec';
@@ -285,7 +335,11 @@ async function cargarDatos() {
 // SELECTOR DE REPARTIDORES
 // ============================================================
 function renderSel() {
-  document.getElementById('rep-grid').innerHTML = repartidores.map(r => {
+  const repsVisibles = usuarioActual && usuarioActual.esAdmin
+    ? repartidores
+    : repartidores.filter(r => r.codigo === (usuarioActual ? usuarioActual.codigo : ''));
+
+  document.getElementById('rep-grid').innerHTML = repsVisibles.map(r => {
     const done = rendGuardadas[r.codigo];
     return `<div class="rep-card${done ? ' done' : ''}" ${done ? '' : `onclick="abrirRep('${r.codigo}')"`}>
       <div class="avatar">${r.apodo.substring(0,2).toUpperCase()}</div>
@@ -602,7 +656,7 @@ function volverRend() { showScreen('screen-rend'); window.scrollTo(0, 0); }
 // ============================================================
 // INICIO
 // ============================================================
-cargarDatos();
+// No llamamos cargarDatos() automáticamente — esperamos el login
 </script>
 
 
