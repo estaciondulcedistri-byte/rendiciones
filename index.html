@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/EstacionDulce/Downloads/rendiciones_v4_55.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rendiciones — Estación Dulce</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a18;min-height:100vh}
+.screen{display:none}.screen.active{display:block}
+
+/* LOADING */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px}
+.loading-spinner{width:40px;height:40px;border:3px solid #e0dfd8;border-top-color:#1a1a18;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:#6b6b67}
+.error-box{background:#fde8e8;border:1px solid #f5b7b7;border-radius:12px;padding:20px;max-width:400px;margin:20px auto;text-align:center}
+.error-box h3{color:#c0392b;margin-bottom:8px}
+.error-box p{font-size:13px;color:#7a3535;margin-bottom:12px}
+.retry-btn{padding:8px 16px;background:#1a1a18;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+
+/* LOGIN */
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-card{background:#fff;border:1px solid #e0dfd8;border-radius:16px;padding:28px 24px;width:100%;max-width:360px}
+.login-logo{font-size:22px;font-weight:700;margin-bottom:4px;text-align:center}
+.login-sub{font-size:13px;color:#6b6b67;text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-label{font-size:12px;font-weight:600;color:#6b6b67;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.login-input{width:100%;padding:11px 14px;font-size:15px;border:1.5px solid #e0dfd8;border-radius:8px;background:#fff;color:#1a1a18;outline:none}
+.login-input:focus{border-color:#1a1a18}
+.login-btn{width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:#1a1a18;color:#fff;margin-top:6px}
+.login-btn:active{opacity:.85}
+.login-error{background:#fde8e8;color:#c0392b;border:1px solid #f5b7b7;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.logout-btn{padding:6px 12px;font-size:12px;border:1px solid #e0dfd8;border-radius:6px;cursor:pointer;background:#fff;color:#6b6b67;font-weight:500}
+
+/* SELECTOR */
+.sel-wrap{padding:24px;max-width:640px;margin:0 auto}
+.sel-title{font-size:20px;font-weight:600;margin-bottom:4px}
+.sel-sub{font-size:14px;color:#6b6b67;margin-bottom:20px}
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.rep-grid{grid-template-columns:1fr}}
+.rep-card{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;user-select:none}
+.rep-card:active{background:#f5f5f3}
+.rep-card.done{opacity:.6;cursor:default}
+.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;background:#e8f0fb;color:#1a56c4;flex-shrink:0}
+.rep-nombre{font-size:15px;font-weight:600}.rep-codigo{font-size:12px;color:#6b6b67}
+.rep-monto{font-size:13px;font-weight:500;margin-top:3px}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:5px}
+.badge-ok{background:#e6f4ea;color:#1a7a3c}.badge-pend{background:#fff3cd;color:#8a6200}
+.resumen-global{margin-top:20px;background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:16px}
+.rg-title{font-size:12px;font-weight:600;color:#6b6b67;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em}
+.rg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.rg-item{background:#f5f5f3;border-radius:8px;padding:10px 12px}
+.rg-label{font-size:11px;color:#6b6b67;margin-bottom:2px}.rg-value{font-size:16px;font-weight:600}
+.rg-ef{color:#1a7a3c}.rg-tr{color:#1a56c4}.rg-pe{color:#8a6200}.rg-total{color:#1a1a18}
+
+/* RENDICION */
+.rend-header{background:#fff;border-bottom:1px solid #e0dfd8;padding:12px 16px;position:sticky;top:0;z-index:10}
+.rend-header-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.back-btn{padding:7px 13px;font-size:13px;border:1px solid #e0dfd8;border-radius:8px;cursor:pointer;background:#fff;color:#1a1a18;font-weight:500}
+.back-btn:active{background:#f5f5f3}
+.rend-rep-name{font-size:16px;font-weight:600;flex:1}
+.totales-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.tot-item{background:#f5f5f3;border-radius:8px;padding:7px 8px;text-align:center}
+.tot-label{font-size:9px;color:#6b6b67;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.tot-value{font-size:12px;font-weight:600}
+.tot-ef{color:#1a7a3c}.tot-tr{color:#1a56c4}.tot-pe{color:#8a6200}.tot-ba{color:#c0392b}.tot-sc{color:#aaa}
+.section-label{padding:8px 16px;font-size:11px;font-weight:600;color:#6b6b67;background:#f5f5f3;border-bottom:1px solid #e0dfd8;letter-spacing:.04em;text-transform:uppercase}
+.venta-row{background:#fff;border-bottom:1px solid #f0f0ee}
+.venta-row.vale-row{opacity:.5;background:#fafaf8}
+.venta-row.pend1{background:#ffe8c0;border-left:4px solid #f5a623;border-top:1px solid #f5a623;border-bottom:1px solid #f5a623}
+.venta-row.pend1 .venta-cliente{color:#a05a00;font-weight:700}
+.venta-row.pend1 .monto-orig{color:#a05a00}
+.venta-row.pend1 .venta-comp{color:#c07830}
+.venta-row.pend2{background:#ffc87a;border-left:4px solid #d4710a;border-top:1px solid #d4710a;border-bottom:1px solid #d4710a}
+.venta-row.pend2 .venta-cliente{color:#7a3500;font-weight:700}
+.venta-row.pend2 .monto-orig{color:#7a3500}
+.venta-row.pend2 .venta-comp{color:#a05000}
+.prox-vale{font-size:10px;font-weight:800;color:#fff;background:#d4710a;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;margin-left:2px}
+.venta-main{padding:9px 12px;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;overflow:hidden}
+.venta-info{flex:1;min-width:0}
+.venta-cliente{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.venta-comp{font-size:10px;color:#bbb}
+.monto-col{text-align:right;margin-right:4px;min-width:86px}
+.monto-orig{font-size:13px;font-weight:600;white-space:nowrap}
+.monto-orig.tachado{text-decoration:line-through;color:#bbb;font-size:11px;display:block}
+.monto-real{font-size:13px;font-weight:700;color:#1a7a3c;display:block}
+.btn-group{display:flex;gap:3px;flex-shrink:0}
+.est-btn{padding:7px 8px;font-size:11px;font-weight:700;border:1px solid #e0dfd8;border-radius:7px;cursor:pointer;background:#fff;color:#999;user-select:none;white-space:nowrap}
+.est-btn:active{transform:scale(.93)}
+.act-ef{background:#e6f4ea;color:#1a7a3c;border-color:#b7dfbf}
+.act-tr{background:#e8f0fb;color:#1a56c4;border-color:#b3cdf5}
+.act-pe{background:#fff3cd;color:#8a6200;border-color:#f5d87a}
+.act-ba{background:#fde8e8;color:#c0392b;border-color:#f5b7b7}
+.act-mx{background:#f3e8fd;color:#7a3ab0;border-color:#d9b8f5}
+.vale-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:#f0f0ee;color:#6b6b67;white-space:nowrap;flex-shrink:0}
+.devol-panel{background:#fffbf0;border-top:1px solid #f5d87a;padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.devol-label{font-size:12px;color:#8a6200;font-weight:500;white-space:nowrap}
+.devol-nc{font-size:13px;font-weight:700;color:#c0392b;white-space:nowrap}
+.devol-ok{font-size:13px;color:#aaa;white-space:nowrap}
+.devol-input-desktop{padding:7px 12px;font-size:15px;font-weight:700;border:2px solid #f5d87a;border-radius:8px;background:#fff;color:#1a1a18;width:150px;text-align:right}
+.devol-input-desktop:focus{outline:none;border-color:#8a6200;background:#fffbf0}
+.devol-monto-btn{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.devol-monto-display{font-size:17px;font-weight:700;color:#1a1a18;padding:7px 14px;background:#fff;border:2px solid #f5d87a;border-radius:8px;min-width:130px;text-align:right}
+.numpad-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center}
+.numpad-overlay.open{display:flex}
+.numpad{background:#fff;border-radius:20px 20px 0 0;padding:16px;width:100%;max-width:420px}
+.numpad-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.numpad-title{font-size:13px;color:#6b6b67;font-weight:500}
+.numpad-display{font-size:28px;font-weight:700;text-align:right;padding:10px 14px;background:#f5f5f3;border-radius:10px;margin-bottom:8px;min-height:54px}
+.numpad-display .hint{font-size:14px;color:#aaa;font-weight:400}
+.numpad-nc{text-align:center;font-size:13px;font-weight:600;margin-bottom:10px;min-height:20px}
+.numpad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nk{padding:18px 0;font-size:22px;font-weight:600;border:none;background:#f5f5f3;border-radius:10px;cursor:pointer;user-select:none;text-align:center}
+.nk:active{background:#e0dfd8;transform:scale(.96)}
+.nk.del{background:#ffe5e5;color:#c0392b;font-size:18px}
+.nk.ok{background:#1a1a18;color:#fff;font-size:16px;grid-column:span 3;padding:16px}
+.rend-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e0dfd8;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.progress-wrap{flex:1}
+.progress-label{font-size:12px;color:#6b6b67;margin-bottom:4px}
+.progress-bar{height:4px;background:#e0dfd8;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:#1a7a3c;border-radius:2px;transition:width .2s}
+.guardar-btn{padding:10px 18px;font-size:14px;font-weight:600;border:none;border-radius:8px;cursor:pointer;background:#1a1a18;color:#fff;white-space:nowrap}
+.guardar-btn:disabled{opacity:.3;cursor:not-allowed}
+.resumen-wrap{padding:20px;max-width:500px;margin:0 auto}
+.res-card{background:#fff;border:1px solid #e0dfd8;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid #f0f0ee;font-size:14px}
+.res-row:last-child{border-bottom:none;font-weight:700;font-size:15px;background:#f5f5f3}
+.res-label{color:#6b6b67}.res-val{font-weight:600}
+.res-danger{color:#c0392b}.res-success{color:#1a7a3c}
+.confirm-btn{width:100%;padding:14px;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#1a1a18;color:#fff;margin-top:4px}
+.confirm-btn:disabled{opacity:.4;cursor:not-allowed}
+.alert{padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;border:1px solid}
+.alert-warn{background:#fff3cd;color:#8a6200;border-color:#f5d87a}
+.alert-ok{background:#e6f4ea;color:#1a7a3c;border-color:#b7dfbf}
+
+/* BILLETES */
+.bill-row{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid #f0f0ee}
+.bill-row:last-child{border-bottom:none}
+.bill-denom{font-size:13px;font-weight:600}
+.bill-input{width:100%;padding:8px 10px;font-size:15px;font-weight:600;text-align:center;border:1.5px solid #e0dfd8;border-radius:8px;background:#fff;color:#1a1a18}
+.bill-input:focus{outline:none;border-color:#1a1a18}
+.bill-subtotal{font-size:12px;color:#6b6b67;text-align:right}
+.bill-total-row{display:flex;justify-content:space-between;padding:11px 16px;font-weight:700;font-size:14px;background:#f5f5f3}
+
+/* TRANSFERENCIAS */
+.tr-card{background:#f5f5f3;border-radius:10px;padding:12px;margin-bottom:8px;position:relative}
+.tr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tr-field{margin-bottom:6px}
+.tr-field.full{grid-column:span 2}
+.tr-label{font-size:10px;color:#6b6b67;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;display:block}
+.tr-input{width:100%;padding:8px 10px;font-size:13px;border:1.5px solid #e0dfd8;border-radius:7px;background:#fff;color:#1a1a18}
+.tr-input:focus{outline:none;border-color:#1a1a18}
+.tr-remove{position:absolute;top:8px;right:8px;width:24px;height:24px;border:none;background:#fde8e8;color:#c0392b;border-radius:50%;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.add-tr-btn{width:100%;padding:11px;font-size:13px;font-weight:600;border:1.5px dashed #c0c0bc;border-radius:10px;background:transparent;color:#6b6b67;cursor:pointer;margin-bottom:8px}
+.add-tr-btn:active{background:#f5f5f3}
+.verif-box{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;margin-top:10px;font-size:13px}
+.verif-ok{background:#e6f4ea;color:#1a7a3c}
+.verif-warn{background:#fde8e8;color:#c0392b}
+.verif-label{font-weight:500}
+.verif-val{font-weight:700}
+.saving-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;font-size:15px;font-weight:600}
+.saving-overlay.open{display:flex}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">🚚 Estación Dulce</div>
+      <div class="login-sub">Sistema de Rendiciones</div>
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+      <div class="login-field">
+        <label class="login-label">Usuario</label>
+        <input class="login-input" id="login-usuario" type="text" placeholder="Ej: R10 o admin" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label class="login-label">Contraseña</label>
+        <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
+      </div>
+      <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="screen" id="screen-loading">
+  <div class="loading-wrap">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando rendiciones...</div>
+  </div>
+</div>
+
+<!-- SELECTOR -->
+<div class="screen" id="screen-sel">
+  <div class="sel-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="sel-title" id="sel-titulo">Rendición</div>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+    </div>
+    <div id="fecha-selector" style="display:none;margin-bottom:12px">
+      <label style="font-size:12px;color:#6b6b67;font-weight:600;display:block;margin-bottom:6px">FECHA A RENDIR</label>
+      <select id="fecha-select" style="width:100%;padding:10px 12px;font-size:14px;border:1.5px solid #e0dfd8;border-radius:8px;background:#fff;color:#1a1a18" onchange="cargarDatos(this.value)">
+      </select>
+    </div>
+    <div class="sel-sub" id="sel-sub">Seleccioná el repartidor para cargar su rendición</div>
+    <div class="rep-grid" id="rep-grid"></div>
+    <div class="resumen-global" id="resumen-global" style="display:none">
+      <div class="rg-title">Resumen del día</div>
+      <div class="rg-grid" id="rg-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RENDICION -->
+<div class="screen" id="screen-rend">
+  <div class="rend-header">
+    <div class="rend-header-top">
+      <button class="back-btn" onclick="volverSel()">← Volver</button>
+      <div class="rend-rep-name" id="rend-rep-name"></div>
+      <button class="back-btn" style="background:#e6f4ea;color:#1a7a3c;border-color:#b7dfbf;font-weight:600" onclick="marcarTodoEF()">Marcar todo EF</button>
+    </div>
+    <div class="totales-bar">
+      <div class="tot-item"><div class="tot-label">Efectivo</div><div class="tot-value tot-ef" id="tot-ef">$0</div></div>
+      <div class="tot-item"><div class="tot-label">Transfer.</div><div class="tot-value tot-tr" id="tot-tr">$0</div></div>
+      <div class="tot-item"><div class="tot-label">Pendiente</div><div class="tot-value tot-pe" id="tot-pe">$0</div></div>
+      <div class="tot-item"><div class="tot-label">Baja</div><div class="tot-value tot-ba" id="tot-ba">$0</div></div>
+      <div class="tot-item"><div class="tot-label">Sin clasif.</div><div class="tot-value tot-sc" id="tot-sc">$0</div></div>
+    </div>
+  </div>
+  <div id="ventas-list"></div>
+  <div style="height:80px"></div>
+  <div class="rend-footer">
+    <div class="progress-wrap">
+      <div class="progress-label" id="prog-label">0 de 0 clasificadas</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <button class="guardar-btn" style="background:#e8f0fb;color:#1a56c4;border:1px solid #b3cdf5" onclick="guardarProgreso()" id="btn-progreso">💾 Guardar</button>
+    <button class="guardar-btn" id="guardar-btn" onclick="mostrarResumen()" disabled="">Ver resumen →</button>
+  </div>
+</div>
+
+<!-- RESUMEN -->
+<div class="screen" id="screen-resumen">
+  <div class="resumen-wrap">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button class="back-btn" onclick="volverRend()">← Revisar</button>
+      <div style="font-size:16px;font-weight:600" id="resumen-titulo"></div>
+    </div>
+    <div id="resumen-content"></div>
+  </div>
+</div>
+
+<!-- NUMPAD -->
+<div class="numpad-overlay" id="numpad-overlay" onclick="cerrarNumpad(event)">
+  <div class="numpad" onclick="event.stopPropagation()">
+    <div class="numpad-header">
+      <div class="numpad-title" id="np-title">Monto cobrado</div>
+      <button class="back-btn" onclick="cerrarNumpad(null)">Cancelar</button>
+    </div>
+    <div class="numpad-display" id="np-display"><span class="hint">Ingresá el monto cobrado</span></div>
+    <div class="numpad-nc" id="np-nc"></div>
+    <div class="numpad-grid">
+      <button class="nk" onclick="nkPress(&#39;7&#39;)">7</button><button class="nk" onclick="nkPress(&#39;8&#39;)">8</button><button class="nk" onclick="nkPress(&#39;9&#39;)">9</button>
+      <button class="nk" onclick="nkPress(&#39;4&#39;)">4</button><button class="nk" onclick="nkPress(&#39;5&#39;)">5</button><button class="nk" onclick="nkPress(&#39;6&#39;)">6</button>
+      <button class="nk" onclick="nkPress(&#39;1&#39;)">1</button><button class="nk" onclick="nkPress(&#39;2&#39;)">2</button><button class="nk" onclick="nkPress(&#39;3&#39;)">3</button>
+      <button class="nk" onclick="nkPress(&#39;000&#39;)">000</button><button class="nk" onclick="nkPress(&#39;0&#39;)">0</button><button class="nk del" onclick="nkPress(&#39;del&#39;)">⌫</button>
+      <button class="nk ok" onclick="nkConfirmar()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVING OVERLAY -->
+<div class="saving-overlay" id="saving-overlay">
+  <div class="loading-spinner" style="border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+  <div>Guardando rendición...</div>
+</div>
+
+<script>
+// ============================================================
+// USUARIOS
+// ============================================================
+const USUARIOS = {
+  'R10':   { pass: 'kuki2025',   codigo: 'R10',   esAdmin: false },
+  'R12':   { pass: 'leonel2025', codigo: 'R12',   esAdmin: false },
+  'R16':   { pass: 'mauro2025',  codigo: 'R16',   esAdmin: false },
+  'admin': { pass: 'dulce2025',  codigo: 'admin', esAdmin: true  },
+};
+
+let usuarioActual = null;
+
+function doLogin() {
+  const usuario = document.getElementById('login-usuario').value.trim().toUpperCase();
+  const pass = document.getElementById('login-pass').value.trim();
+  const errorEl = document.getElementById('login-error');
+
+  // Buscar usuario (case-insensitive)
+  const key = Object.keys(USUARIOS).find(k => k.toUpperCase() === usuario);
+  const u = key ? USUARIOS[key] : null;
+
+  if (!u || u.pass !== pass) {
+    errorEl.style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+  usuarioActual = u;
+  showScreen('screen-loading');
+  cargarDatos();
+}
+
+function doLogout() {
+  usuarioActual = null;
+  document.getElementById('login-usuario').value = '';
+  document.getElementById('login-pass').value = '';
+  showScreen('screen-login');
+}
+
+// ============================================================
+// CONFIGURACIÓN — CAMBIÁ SOLO ESTA URL
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6YsKihCeOIDtamdsMTSukRDFW1zp1uOTas3KrT_a_0DL_Uf92dawkTmdqf2vNGBMS/exec';
+// ============================================================
+
+const fmt = n => '$' + Math.round(n).toLocaleString('es-AR');
+const esMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
+
+let repartidores = [];
+let ventas = {};
+let fechaDia = '';
+let fechasDisponibles = {};
+let estados = {};
+let montosReales = {};
+let montosMixtos = {};
+let motivosBaja = {};
+let rendGuardadas = {};
+let repActual = null;
+let npComp = null, npMontoOrig = 0, npValor = '', npMontoEF = 0;
+
+// ============================================================
+// CARGA DE DATOS DESDE GOOGLE SHEETS
+// ============================================================
+async function cargarDatos(fecha) {
+  try {
+    const url = SCRIPT_URL + '?action=getDatos' + (fecha ? '&fecha=' + encodeURIComponent(fecha) : '');
+    const resp = await fetch(url, { method: 'GET' });
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'Error desconocido');
+
+    repartidores = data.repartidores;
+    ventas = data.ventas;
+    fechaDia = data.fecha;
+    fechasDisponibles = data.fechasDisponibles || {};
+
+    document.getElementById('sel-titulo').textContent = 'Rendición — ' + fechaDia;
+    showScreen('screen-sel');
+    renderSel();
+  } catch (err) {
+    document.getElementById('screen-loading').innerHTML = `
+      <div class="loading-wrap">
+        <div class="error-box">
+          <h3>Error al cargar datos</h3>
+          <p>${err.message}</p>
+          <button class="retry-btn" onclick="cargarDatos()">Reintentar</button>
+        </div>
+      </div>`;
+  }
+}
+
+// ============================================================
+// SELECTOR DE REPARTIDORES
+// ============================================================
+function renderSel() {
+  const repsVisibles = usuarioActual && usuarioActual.esAdmin
+    ? repartidores
+    : repartidores.filter(r => r.codigo === (usuarioActual ? usuarioActual.codigo : ''));
+
+  // Armar selector de fechas: si el usuario tiene más de una fecha disponible
+  const codigosVisibles = repsVisibles.map(r => r.codigo);
+  const todasFechas = new Set();
+  codigosVisibles.forEach(cod => {
+    (fechasDisponibles[cod] || []).forEach(f => todasFechas.add(f));
+  });
+  const fechasArr = Array.from(todasFechas).sort().reverse();
+  const selectorEl = document.getElementById('fecha-selector');
+  const selectEl = document.getElementById('fecha-select');
+  if (fechasArr.length > 1) {
+    selectorEl.style.display = 'block';
+    selectEl.innerHTML = fechasArr.map(f =>
+      `<option value="${f}" ${f === fechaDia ? 'selected' : ''}>${f}</option>`
+    ).join('');
+  } else {
+    selectorEl.style.display = 'none';
+  }
+
+  document.getElementById('rep-grid').innerHTML = repsVisibles.map(r => {
+    const done = rendGuardadas[r.codigo];
+    return `<div class="rep-card${done ? ' done' : ''}" ${done ? '' : `onclick="abrirRep('${r.codigo}')"`}>
+      <div class="avatar">${r.apodo.substring(0,2).toUpperCase()}</div>
+      <div>
+        <div class="rep-nombre">${r.apodo}</div>
+        <div class="rep-codigo">${r.codigo} · ${r.nombre}</div>
+        <div class="rep-monto">Total: ${fmt(r.totalRendir)}</div>
+        ${r.pendiente > 0 ? `<div class="rep-monto" style="font-size:11px;color:#8a6200;margin-top:2px">Pendiente: ${fmt(r.pendiente)}</div>` : ''}
+        <span class="badge ${done ? 'badge-ok' : 'badge-pend'}">${done ? '✓ Rendido' : 'Pendiente'}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const keys = Object.keys(rendGuardadas);
+  if (keys.length > 0) {
+    let ef = 0, tr = 0, pe = 0, tot = 0;
+    keys.forEach(c => { const d = rendGuardadas[c]; ef += d.ef; tr += d.tr; pe += d.pe; tot += d.totalRendir; });
+    document.getElementById('resumen-global').style.display = 'block';
+    document.getElementById('rg-grid').innerHTML = `
+      <div class="rg-item"><div class="rg-label">Total rendido</div><div class="rg-value rg-total">${fmt(tot)}</div></div>
+      <div class="rg-item"><div class="rg-label">Efectivo</div><div class="rg-value rg-ef">${fmt(ef)}</div></div>
+      <div class="rg-item"><div class="rg-label">Transferencias</div><div class="rg-value rg-tr">${fmt(tr)}</div></div>
+      <div class="rg-item"><div class="rg-label">Pendiente</div><div class="rg-value rg-pe">${fmt(pe)}</div></div>`;
+  }
+}
+
+function repByCode(c) { return repartidores.find(r => r.codigo === c); }
+
+// ============================================================
+// RENDICION
+// ============================================================
+async function abrirRep(codigo) {
+  repActual = codigo;
+  document.getElementById('rend-rep-name').textContent = repByCode(codigo).apodo + ' — ' + codigo;
+  
+  // Limpiar estados para este repartidor
+  estados = {}; montosReales = {}; montosMixtos = {}; motivosBaja = {};
+  (ventas[codigo] || []).forEach(v => {
+    if (v.vale) estados[v.comp] = 'va';
+    else estados[v.comp] = null;
+  });
+  
+  // Intentar restaurar progreso guardado
+  const restaurado = await restaurarProgreso(codigo, fechaDia);
+  if (restaurado) {
+    // Asegurar que los vales sigan como 'va'
+    (ventas[codigo] || []).forEach(v => { if (v.vale) estados[v.comp] = 'va'; });
+  }
+  
+  renderVentas();
+  showScreen('screen-rend');
+  window.scrollTo(0, 0);
+}
+
+function renderVentas() {
+  const vv = ventas[repActual] || [];
+  const pend = vv.filter(v => v.tipo === 'pend');
+  const dia = vv.filter(v => v.tipo === 'dia');
+  let html = '';
+  if (pend.length) {
+    html += `<div class="section-label">Pendientes arrastrados — ${pend.length} boleta${pend.length > 1 ? 's' : ''}</div>`;
+    html += pend.map(v => ventaRow(v)).join('');
+  }
+  html += `<div class="section-label">Ventas del día ${fechaDia} — ${dia.length} boleta${dia.length > 1 ? 's' : ''}</div>`;
+  html += dia.map(v => ventaRow(v)).join('');
+  document.getElementById('ventas-list').innerHTML = html;
+  actualizarTotales();
+}
+
+function ventaRow(v) {
+  const est = estados[v.comp];
+  const mr = montosReales[v.comp];
+  const montoBase = est === 'ef' ? (v.montoEF || v.monto) : v.monto;
+  const tieneDevol = mr !== undefined && mr < montoBase;
+  const nc = tieneDevol ? montoBase - mr : 0;
+
+  if (v.vale || est === 'va') {
+    return `<div class="venta-row vale-row"><div class="venta-main">
+      <div class="venta-info"><div class="venta-cliente">${v.cliente}</div><div class="venta-comp">${v.comp}</div></div>
+      <div class="monto-col"><span class="monto-orig">${fmt(v.monto)}</span></div>
+      <span class="vale-tag">VALE</span></div></div>`;
+  }
+
+  if (v.comp === 'SALDO' && v.monto < 0) {
+    return `<div class="venta-row" style="background:#e6f4ea"><div class="venta-main">
+      <div class="venta-info"><div class="venta-cliente" style="color:#1a7a3c;font-weight:700">${v.cliente}</div></div>
+      <div class="monto-col"><span class="monto-orig" style="color:#1a7a3c">${fmt(v.monto)}</span></div>
+      <span style="font-size:11px;color:#1a7a3c;font-weight:600;padding:4px 8px;background:#fff;border-radius:6px;border:1px solid #b7dfbf">A FAVOR</span>
+      </div></div>`;
+  }
+
+  if (v.monto <= 0) {
+    return `<div class="venta-row" style="background:#fef0f0"><div class="venta-main">
+      <div class="venta-info"><div class="venta-cliente" style="color:#c0392b">${v.cliente} — NC</div><div class="venta-comp">${v.comp}</div></div>
+      <div class="monto-col"><span class="monto-orig" style="color:#c0392b">${fmt(v.monto)}</span></div>
+      <span style="font-size:11px;color:#c0392b;font-weight:600;padding:4px 8px;background:#fde8e8;border-radius:6px">NC</span>
+      </div></div>`;
+  }
+
+  let montoDisplay = '';
+  if (est === 'ef') {
+    const mef = v.montoEF || v.monto;
+    if (tieneDevol) {
+      montoDisplay = `<div class="monto-col"><span class="monto-orig tachado">${fmt(mef)}</span><span class="monto-real">${fmt(mr)}</span></div>`;
+    } else {
+      montoDisplay = `<div class="monto-col"><span class="monto-orig" style="color:#1a7a3c">${fmt(mef)}</span></div>`;
+    }
+  } else if (est === 'mx') {
+    const mx = montosMixtos[v.comp] || { ef: 0, tr: 0 };
+    montoDisplay = `<div class="monto-col"><span class="monto-orig tachado">${fmt(v.monto)}</span><span class="monto-real">${fmt(mx.ef + mx.tr)}</span></div>`;
+  } else if (tieneDevol) {
+    montoDisplay = `<div class="monto-col"><span class="monto-orig tachado">${fmt(v.monto)}</span><span class="monto-real">${fmt(mr)}</span></div>`;
+  } else {
+    montoDisplay = `<div class="monto-col"><span class="monto-orig">${fmt(v.monto)}</span></div>`;
+  }
+
+  let devolPanel = '';
+  if (est === 'mx') {
+    const mx = montosMixtos[v.comp] || { ef: 0, tr: 0 };
+    const restante = v.monto - mx.ef - mx.tr;
+    devolPanel = `<div class="devol-panel">
+      <span class="devol-label">Efectivo:</span>
+      <input class="devol-input-desktop" style="width:110px" type="number" min="0" max="${v.monto}" value="${mx.ef || ''}" placeholder="0"
+        oninput="setMixto('${v.comp}','ef',this.value,${v.monto})">
+      <span class="devol-label">Transferencia:</span>
+      <input class="devol-input-desktop" style="width:110px" type="number" min="0" max="${v.monto}" value="${mx.tr || ''}" placeholder="0"
+        oninput="setMixto('${v.comp}','tr',this.value,${v.monto})">
+      <span class="${restante > 0 ? 'devol-nc' : 'devol-ok'}" id="mx-rest-${v.comp.replace(/\W/g,'_')}">${restante > 0 ? 'Falta: ' + fmt(restante) + ' (queda en saldo)' : (restante < 0 ? 'Excede $' + fmt(Math.abs(restante)) : 'Suma correcta')}</span>
+    </div>`;
+  } else if (est === 'ef' || est === 'tr') {
+    const baseActual = est === 'ef' ? (v.montoEF || v.monto) : v.monto;
+    const valActual = mr !== undefined ? mr : baseActual;
+    const tieneDevol2 = mr !== undefined && mr < baseActual;
+    if (esMobile) {
+      devolPanel = `<div class="devol-panel"><span class="devol-label">Monto cobrado — tocá para editar:</span>
+        <div class="devol-monto-btn" onclick="abrirNumpad('${v.comp}',${baseActual},${v.montoEF || v.monto})">
+        <div class="devol-monto-display">${fmt(valActual)}</div></div>
+        <span class="${nc > 0 ? 'devol-nc' : 'devol-ok'}">${nc > 0 ? 'NC: ' + fmt(nc) : 'Sin devolución'}</span></div>`;
+    } else {
+      devolPanel = `<div class="devol-panel">
+        <span class="devol-label">${est === 'ef' ? 'Monto EF:' : 'Monto TR:'}</span>
+        <input class="devol-input-desktop" type="number" id="inp-${v.comp.replace(/\W/g,'_')}"
+          value="${Math.round(valActual)}" min="1" max="${baseActual}" step="1"
+          oninput="setMontoRealDesktop('${v.comp}',this.value,${baseActual})"
+          onblur="validarMontoDesktop('${v.comp}',this,${baseActual})">
+        <span id="nc-${v.comp.replace(/\W/g,'_')}" class="${tieneDevol2 ? 'devol-nc' : 'devol-ok'}">${tieneDevol2 ? 'NC: ' + fmt(nc) : 'Sin devolución'}</span>
+      </div>`;
+    }
+  }
+
+  const pendClass = v.tipo === 'pend' ? (v.periodos >= 2 ? ' pend2' : ' pend1') : '';
+  const proxVale = v.tipo === 'pend' && v.periodos >= 2 ? '<span class="prox-vale">Próx. Vale!!</span>' : '';
+
+  // Panel de motivo de baja
+  let bajaPanel = '';
+  if (est === 'ba') {
+    const motivo = motivosBaja[v.comp] || '';
+    bajaPanel = `<div class="devol-panel" style="background:#fde8e8;border-top:1px solid #f5b7b7">
+      <span class="devol-label" style="color:#c0392b">Motivo de baja:</span>
+      <input type="text" placeholder="Escribí el motivo..." value="${motivo.replace(/"/g,'&quot;')}"
+        style="flex:1;padding:7px 10px;font-size:13px;border:1.5px solid #f5b7b7;border-radius:8px;background:#fff;color:#1a1a18"
+        oninput="setMotivoBaja('${v.comp}',this.value)">
+    </div>`;
+  }
+
+  // En desktop: input inline en la misma fila, sin panel separado
+  let inlineInput = '';
+  if (!esMobile && (est === 'ef' || est === 'tr')) {
+    const baseActual = est === 'ef' ? (v.montoEF || v.monto) : v.monto;
+    const valActual = mr !== undefined ? mr : baseActual;
+    const tieneDevol2 = mr !== undefined && mr < baseActual;
+    inlineInput = `<input class="devol-input-desktop" style="width:120px;margin:0 4px" type="number" 
+      id="inp-${v.comp.replace(/\W/g,'_')}"
+      value="${Math.round(valActual)}" min="1" max="${baseActual}" step="1"
+      oninput="setMontoRealDesktop('${v.comp}',this.value,${baseActual})"
+      onblur="validarMontoDesktop('${v.comp}',this,${baseActual})">
+    <span id="nc-${v.comp.replace(/\W/g,'_')}" style="font-size:11px;font-weight:600;white-space:nowrap" class="${tieneDevol2 ? 'devol-nc' : 'devol-ok'}">${tieneDevol2 ? 'NC: ' + fmt(nc) : ''}</span>`;
+    devolPanel = ''; // no usar panel separado en desktop
+  }
+
+  return `<div class="venta-row${pendClass}"><div class="venta-main">
+    <div class="venta-info"><div class="venta-cliente">${v.cliente}</div><div class="venta-comp">${v.comp}</div></div>
+    ${montoDisplay}${proxVale}${inlineInput}
+    <div class="btn-group">
+      <button class="est-btn${est === 'ef' ? ' act-ef' : ''}" onclick="setEst('${v.comp}','ef',${v.monto},${v.montoEF || v.monto})">EF</button>
+      <button class="est-btn${est === 'tr' ? ' act-tr' : ''}" onclick="setEst('${v.comp}','tr',${v.monto},${v.montoEF || v.monto})">TR</button>
+      <button class="est-btn${est === 'mx' ? ' act-mx' : ''}" onclick="setEst('${v.comp}','mx',${v.monto},${v.montoEF || v.monto})">MIXTO</button>
+      <button class="est-btn${est === 'pe' ? ' act-pe' : ''}" onclick="setEst('${v.comp}','pe',${v.monto},${v.montoEF || v.monto})">PEND</button>
+      <button class="est-btn${est === 'ba' ? ' act-ba' : ''}" onclick="setEst('${v.comp}','ba',${v.monto},${v.montoEF || v.monto})">BAJA</button>
+    </div></div>${esMobile ? devolPanel : ''}${bajaPanel}</div>`;
+}
+
+function marcarTodoEF() {
+  const vv = (ventas[repActual] || []).filter(v => !v.vale && v.monto > 0);
+  vv.forEach(v => {
+    estados[v.comp] = 'ef';
+    montosReales[v.comp] = v.montoEF || v.monto;
+  });
+  renderVentas();
+}
+
+function setMotivoBaja(comp, valor) {
+  motivosBaja[comp] = valor;
+}
+
+function setEst(comp, est, montoTR, montoEF) {
+  const prev = estados[comp];
+  estados[comp] = prev === est ? null : est;
+  if (est === 'pe' || est === 'ba') { delete montosReales[comp]; delete montosMixtos[comp]; }
+  if (est !== 'ba') delete motivosBaja[comp];
+  if (est === 'ef' && prev !== 'ef') { montosReales[comp] = montoEF; delete montosMixtos[comp]; }
+  if (est === 'tr' && prev !== 'tr') { montosReales[comp] = montoTR; delete montosMixtos[comp]; }
+  if (est === 'mx' && prev !== 'mx') { delete montosReales[comp]; if (!montosMixtos[comp]) montosMixtos[comp] = { ef: 0, tr: 0 }; }
+  if (estados[comp] === null) delete montosMixtos[comp];
+  renderVentas();
+}
+
+function setMixto(comp, tipo, valor, montoBase) {
+  const v = Math.max(0, parseFloat(valor) || 0);
+  if (!montosMixtos[comp]) montosMixtos[comp] = { ef: 0, tr: 0 };
+  montosMixtos[comp][tipo] = v;
+  const mx = montosMixtos[comp];
+  const restante = montoBase - mx.ef - mx.tr;
+  const span = document.getElementById('mx-rest-' + comp.replace(/\W/g,'_'));
+  if (span) {
+    span.className = restante > 0 ? 'devol-nc' : 'devol-ok';
+    span.textContent = restante > 0 ? 'Falta: ' + fmt(restante) + ' (queda en saldo)' : (restante < 0 ? 'Excede $' + fmt(Math.abs(restante)) : 'Suma correcta');
+  }
+  actualizarTotales();
+}
+
+function setMontoRealDesktop(comp, valor, montoBase) {
+  const v = parseFloat(valor) || 0;
+  montosReales[comp] = v > 0 ? v : montoBase;
+  const nc = montoBase - (montosReales[comp] || montoBase);
+  const id = comp.replace(/\W/g, '_');
+  const span = document.getElementById('nc-' + id);
+  if (span) { span.className = nc > 0 ? 'devol-nc' : 'devol-ok'; span.textContent = nc > 0 ? 'NC: ' + fmt(nc) : 'Sin devolución'; }
+  actualizarTotales();
+}
+
+function validarMontoDesktop(comp, input, montoBase) {
+  const v = parseFloat(input.value) || 0;
+  if (v <= 0 || v > montoBase) {
+    montosReales[comp] = montoBase; input.value = Math.round(montoBase);
+    const id = comp.replace(/\W/g, '_');
+    const span = document.getElementById('nc-' + id);
+    if (span) { span.className = 'devol-ok'; span.textContent = 'Sin devolución'; }
+  } else { montosReales[comp] = v; }
+  actualizarTotales();
+}
+
+function actualizarTotales() {
+  const vv = (ventas[repActual] || []).filter(v => !v.vale && v.monto > 0);
+  let ef = 0, tr = 0, pe = 0, ba = 0, sc = 0;
+  vv.forEach(v => {
+    const e = estados[v.comp];
+    const mr = montosReales[v.comp];
+    if (e === 'ef') ef += (mr !== undefined ? mr : (v.montoEF || v.monto));
+    else if (e === 'tr') tr += (mr !== undefined ? mr : v.monto);
+    else if (e === 'mx') { const mx = montosMixtos[v.comp] || {ef:0,tr:0}; ef += mx.ef; tr += mx.tr; }
+    else if (e === 'pe') pe += v.monto;
+    else if (e === 'ba') ba += v.monto;
+    else sc += v.monto;
+  });
+  document.getElementById('tot-ef').textContent = fmt(ef);
+  document.getElementById('tot-tr').textContent = fmt(tr);
+  document.getElementById('tot-pe').textContent = fmt(pe);
+  document.getElementById('tot-ba').textContent = fmt(ba);
+  document.getElementById('tot-sc').textContent = fmt(sc);
+  const clasificadas = vv.filter(v => estados[v.comp] !== null).length;
+  const total = vv.length;
+  const pct = total > 0 ? Math.round(clasificadas / total * 100) : 0;
+  document.getElementById('prog-label').textContent = clasificadas + ' de ' + total + ' clasificadas (' + pct + '%)';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('guardar-btn').disabled = clasificadas < total;
+}
+
+// ============================================================
+// RESUMEN Y CONFIRMACION
+// ============================================================
+const DENOMINACIONES = [20000, 10000, 2000, 1000, 500, 200, 100, 50, 20, 10];
+let billetes = {};
+let transferencias = [];
+let trIdCounter = 0;
+
+function mostrarResumen() {
+  const rep = repByCode(repActual);
+  document.getElementById('resumen-titulo').textContent = 'Resumen — ' + rep.apodo;
+  const vv = ventas[repActual] || [];
+  let ef = 0, tr = 0, pe = 0, ba = 0, vale = 0, nc = 0, descEF = 0, devol = 0;
+  vv.forEach(v => {
+    const e = estados[v.comp]; const mr = montosReales[v.comp];
+    if (v.vale || e === 'va') vale += v.monto;
+    else if (e === 'ef') {
+      const base = v.montoEF || v.monto; const cobrado = mr !== undefined ? mr : base;
+      ef += cobrado;
+      if (base < v.monto) descEF += (v.monto - base); // descuento por pago EF (precio lista vs EF)
+      if (cobrado < base) devol += (base - cobrado);  // devolución manual (mercadería vuelve)
+    } else if (e === 'tr') {
+      const cobrado = mr !== undefined ? mr : v.monto;
+      tr += cobrado; if (cobrado < v.monto) devol += (v.monto - cobrado);
+    } else if (e === 'mx') {
+      const mx = montosMixtos[v.comp] || {ef:0,tr:0};
+      ef += mx.ef; tr += mx.tr;
+      // Si el mixto no cubre el total, ya queda reflejado en Saldo Cons. (menos EF+TR entregado)
+      // No se suma a "devol" para no contarlo dos veces.
+    } else if (e === 'pe') pe += v.monto;
+    else if (e === 'ba') ba += v.monto;
+  });
+  nc = descEF + devol;
+  const totalRendirBruto = rep.totalRendir || 0;
+  const totalRendir = totalRendirBruto - ba - devol - pe - descEF;
+  const saldo = totalRendir - (ef + tr + vale);
+  const cierra = Math.abs(saldo) < 500;
+
+  ultimoTotalRendir = totalRendir;
+  ultimoEf = ef;
+  ultimoTr = tr;
+  ultimoVale = vale;
+
+  // Inicializar billetes si no existen
+  if (Object.keys(billetes).length === 0) {
+    DENOMINACIONES.forEach(d => billetes[d] = 0);
+  }
+  // Inicializar con 1 transferencia vacía si no hay ninguna y hay monto TR
+  if (transferencias.length === 0 && tr > 0) {
+    transferencias.push({ id: ++trIdCounter, idCte: '', titular: '', monto: '', fecha: '', cuit: '' });
+  }
+
+  document.getElementById('resumen-content').innerHTML = `
+    <div class="res-card">
+      <div class="res-row"><span class="res-label">Queda pendiente</span><span class="res-val" style="color:#8a6200">${fmt(pe)}</span></div>
+      <div class="res-row"><span class="res-label">Bajas completas</span><span class="res-val" style="color:#c0392b">${fmt(ba)}</span></div>
+      <div class="res-row"><span class="res-label">Descuento por pago EF</span><span class="res-val" style="color:#8a6200">${fmt(descEF)}</span></div>
+      <div class="res-row"><span class="res-label">Devoluciones (NC real)</span><span class="res-val" style="color:#c0392b">${fmt(devol)}</span></div>
+      <div class="res-row"><span class="res-label">Total a rendir</span><span class="res-val">${fmt(totalRendir)}</span></div>
+    </div>
+
+    <div class="res-card">
+      <div style="padding:11px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #f0f0ee">💵 Conteo de efectivo</div>
+      ${DENOMINACIONES.map(d => `
+        <div class="bill-row">
+          <div class="bill-denom">$${d.toLocaleString('es-AR')}</div>
+          <input class="bill-input" type="number" min="0" inputmode="numeric" value="${billetes[d] || ''}" placeholder="0"
+            oninput="setBillete(${d}, this.value)">
+          <div class="bill-subtotal" id="bill-sub-${d}">${fmt((billetes[d]||0) * d)}</div>
+        </div>`).join('')}
+      <div class="bill-total-row"><span>Efectivo (integrado)</span><span id="bill-total">${fmt(totalBilletes())}</span></div>
+    </div>
+
+    <div class="res-card">
+      <div style="padding:11px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #f0f0ee">🏦 Transferencias recibidas</div>
+      <div style="padding:10px 16px;font-size:12px;color:#6b6b67;border-bottom:1px solid #f0f0ee">Boletas declaradas con pago por transferencia (TR/MIXTO): <strong>${fmt(capacidadTransferencia())}</strong></div>
+      <div style="padding:12px" id="tr-list">${transferencias.map(t => trCard(t)).join('')}</div>
+      <div style="padding:0 12px 12px">
+        <button class="add-tr-btn" onclick="addTransferencia()">+ Agregar transferencia</button>
+      </div>
+      <div class="bill-total-row"><span>Transferencia (integrado)</span><span id="tr-total">${fmt(totalTransferencias())}</span></div>
+    </div>
+    <div id="tr-warning"></div>
+
+    <div class="res-card">
+      <div style="padding:11px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #f0f0ee">🎫 Vale entregado</div>
+      <div class="bill-row" style="grid-template-columns:1fr 140px">
+        <div class="bill-denom">Monto del vale</div>
+        <input class="bill-input" type="number" min="0" inputmode="numeric" value="${valeIntegrado || ''}" placeholder="0"
+          oninput="setValeIntegrado(this.value)">
+      </div>
+    </div>
+
+    <div id="alert-final">${alertFinalHTML()}</div>
+
+    <button class="confirm-btn" id="btn-confirmar" onclick="confirmarRendicion(${ef},${tr},${pe},${ba},${vale},${nc},${cierra},${descEF},${devol})">Confirmar rendición de ${rep.apodo}</button>
+    <button class="back-btn" style="width:100%;margin-top:10px;text-align:center;display:block;padding:10px" onclick="volverRend()">← Volver a revisar</button>`;
+  showScreen('screen-resumen');
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// CONTEO DE BILLETES
+// ============================================================
+function totalBilletes() {
+  return DENOMINACIONES.reduce((acc, d) => acc + (billetes[d] || 0) * d, 0);
+}
+function setBillete(denom, valor) {
+  billetes[denom] = parseInt(valor) || 0;
+  document.getElementById('bill-sub-' + denom).textContent = fmt(billetes[denom] * denom);
+  document.getElementById('bill-total').textContent = fmt(totalBilletes());
+  actualizarAlertFinal();
+}
+
+// ============================================================
+// TRANSFERENCIAS
+// ============================================================
+function trCard(t) {
+  const opciones = clientesTrMx().map(c =>
+    `<option value="${c.idCte}" ${t.idCte === c.idCte ? 'selected' : ''}>${c.cliente} (${fmt(c.total)})</option>`
+  ).join('');
+  return `<div class="tr-card" id="trc-${t.id}">
+    <button class="tr-remove" onclick="removeTransferencia(${t.id})">×</button>
+    <div class="tr-grid">
+      <div class="tr-field full"><span class="tr-label">Cliente (boletas TR/MIXTO)</span>
+        <select class="tr-input" onchange="setTr(${t.id},'idCte',this.value)">
+          <option value="">— Seleccionar cliente —</option>
+          ${opciones}
+        </select></div>
+      <div class="tr-field full"><span class="tr-label">Titular de la cuenta (quien transfirió)</span>
+        <input class="tr-input" type="text" placeholder="Nombre y apellido" value="${t.titular}" oninput="setTr(${t.id},'titular',this.value)"></div>
+      <div class="tr-field"><span class="tr-label">Monto</span>
+        <input class="tr-input" type="number" min="0" placeholder="$0" value="${t.monto}" oninput="setTr(${t.id},'monto',this.value)"></div>
+      <div class="tr-field"><span class="tr-label">Fecha</span>
+        <input class="tr-input" type="date" value="${t.fecha}" oninput="setTr(${t.id},'fecha',this.value)"></div>
+      <div class="tr-field full"><span class="tr-label">CUIT / CUIL de origen</span>
+        <input class="tr-input" type="text" placeholder="20-XXXXXXXX-X" value="${t.cuit}" oninput="setTr(${t.id},'cuit',this.value)"></div>
+      <div class="tr-field full" id="tr-aviso-${t.id}">${avisoTr(t)}</div>
+    </div>
+  </div>`;
+}
+
+function avisoTr(t) {
+  if (!t.idCte) return '';
+  const c = clientesTrMx().find(c => c.idCte === t.idCte);
+  const cap = c ? c.total : 0;
+  if (parseFloat(t.monto) > cap + 1) {
+    return `<span style="color:#c0392b;font-size:12px;font-weight:600">⚠️ Este cliente tiene ${fmt(cap)} en boletas TR/MIXTO. El monto declarado lo supera — revisar.</span>`;
+  }
+  return '';
+}
+
+// Clientes con boletas marcadas TR o MIXTO, agrupados por Id. Cte
+// Suma de boletas marcadas TR o MIXTO (referencia para el repartidor)
+function capacidadTransferencia() {
+  return (ventas[repActual] || []).reduce((acc, v) => {
+    const e = estados[v.comp];
+    if (e === 'tr' || e === 'mx') return acc + v.monto;
+    return acc;
+  }, 0);
+}
+
+function clientesTrMx() {
+  const vv = ventas[repActual] || [];
+  const map = {};
+  vv.forEach(v => {
+    const e = estados[v.comp];
+    if (e !== 'tr' && e !== 'mx') return;
+    const key = v.idCte || v.cliente;
+    if (!map[key]) map[key] = { idCte: key, cliente: v.cliente, total: 0 };
+    map[key].total += v.monto;
+  });
+  return Object.values(map);
+}
+
+function addTransferencia() {
+  transferencias.push({ id: ++trIdCounter, idCte: '', titular: '', monto: '', fecha: '', cuit: '' });
+  document.getElementById('tr-list').innerHTML = transferencias.map(t => trCard(t)).join('');
+  actualizarTotalTr();
+  actualizarAlertFinal();
+  actualizarAdvertenciaTr();
+}
+function removeTransferencia(id) {
+  transferencias = transferencias.filter(t => t.id !== id);
+  document.getElementById('tr-list').innerHTML = transferencias.map(t => trCard(t)).join('');
+  actualizarTotalTr();
+  actualizarAlertFinal();
+  actualizarAdvertenciaTr();
+}
+function setTr(id, campo, valor) {
+  const t = transferencias.find(t => t.id === id);
+  if (t) t[campo] = valor;
+  if (campo === 'idCte') {
+    document.getElementById('tr-list').innerHTML = transferencias.map(t => trCard(t)).join('');
+    actualizarTotalTr();
+    actualizarAlertFinal();
+  }
+  if (campo === 'monto') {
+    const avisoEl = document.getElementById('tr-aviso-' + id);
+    if (avisoEl) avisoEl.innerHTML = avisoTr(t);
+    actualizarTotalTr();
+    actualizarAlertFinal();
+  }
+}
+function actualizarAdvertenciaTr() {
+  const el = document.getElementById('tr-warning');
+  if (!el) return;
+  el.innerHTML = '';
+}
+function totalTransferencias() {
+  return transferencias.reduce((acc, t) => acc + (parseFloat(t.monto) || 0), 0);
+}
+function actualizarTotalTr() {
+  const el = document.getElementById('tr-total');
+  if (el) el.textContent = fmt(totalTransferencias());
+}
+
+// ============================================================
+// VERIFICACION FINAL — Total a Rendir = Contado + Transf + NC + Baja + Vale + Pendiente
+// ============================================================
+let valeIntegrado = 0;
+function setValeIntegrado(valor) {
+  valeIntegrado = Math.max(0, parseFloat(valor) || 0);
+  actualizarAlertFinal();
+}
+
+let ultimoTotalRendir = 0, ultimoEf = 0, ultimoTr = 0, ultimoVale = 0;
+
+function alertFinalHTML() {
+  const saldoCons = ultimoTotalRendir - totalBilletes() - totalTransferencias() - valeIntegrado;
+  if (Math.abs(saldoCons) < 1) {
+    return `<div class="alert alert-ok">✓ Saldo Cons.: $0 — no queda nada pendiente para el próximo consolidado.</div>`;
+  }
+  if (saldoCons > 0) {
+    return `<div class="alert alert-warn">Saldo Cons.: ${fmt(saldoCons)} — ese monto queda pendiente para el próximo consolidado.</div>`;
+  }
+  return `<div class="alert alert-ok">Saldo Cons.: ${fmt(saldoCons)} (a favor) — se descuenta del próximo consolidado.</div>`;
+}
+function actualizarAlertFinal() {
+  const el = document.getElementById('alert-final');
+  if (!el) return;
+  el.innerHTML = alertFinalHTML();
+}
+
+async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devol) {
+  const rep = repByCode(repActual);
+  const btn = document.getElementById('btn-confirmar');
+  btn.disabled = true;
+  document.getElementById('saving-overlay').classList.add('open');
+
+  const transferenciasValidas = transferencias.filter(t => t.titular || t.monto);
+
+  const payload = {
+    action: 'guardarRendicion',
+    fecha: fechaDia,
+    repartidor: rep.apodo,
+    codigo: rep.codigo,
+    totalRendir: totalRendir,
+    ef, tr, pe, ba, vale: valeIntegrado, nc, descEF, devol,
+    cierra,
+    billetes: billetes,
+    totalContado: totalBilletes(),
+    transferencias: transferenciasValidas,
+    totalTransferenciasDetalle: totalTransferencias()
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    rendGuardadas[repActual] = { ef, tr, pe, ba, vale: valeIntegrado, nc, totalRendir: rep.totalRendir };
+    billetes = {}; transferencias = []; trIdCounter = 0; valeIntegrado = 0;
+    document.getElementById('saving-overlay').classList.remove('open');
+    showScreen('screen-sel');
+    renderSel();
+    window.scrollTo(0, 0);
+  } catch (err) {
+    document.getElementById('saving-overlay').classList.remove('open');
+    btn.disabled = false;
+    alert('Error al guardar. Verificá tu conexión e intentá de nuevo.');
+  }
+}
+
+// ============================================================
+// NUMPAD
+// ============================================================
+function abrirNumpad(comp, montoBase, montoEF) {
+  npComp = comp; npMontoOrig = montoBase; npMontoEF = montoEF;
+  const mr = montosReales[comp];
+  npValor = mr !== undefined ? String(Math.round(mr)) : '';
+  actualizarNumpadDisplay();
+  document.getElementById('numpad-overlay').classList.add('open');
+}
+function cerrarNumpad(e) {
+  if (e === null || e.target === document.getElementById('numpad-overlay')) {
+    document.getElementById('numpad-overlay').classList.remove('open');
+    npComp = null; npValor = '';
+  }
+}
+function nkPress(key) {
+  if (key === 'del') npValor = npValor.slice(0, -1);
+  else if (npValor === '0') npValor = key;
+  else npValor += key;
+  actualizarNumpadDisplay();
+}
+function actualizarNumpadDisplay() {
+  const v = parseInt(npValor) || 0; const nc = npMontoOrig - v;
+  const disp = document.getElementById('np-display'); const ncEl = document.getElementById('np-nc');
+  if (!npValor) { disp.innerHTML = '<span class="hint">Ingresá el monto cobrado</span>'; disp.style.color = ''; ncEl.textContent = ''; ncEl.style.color = ''; }
+  else if (v > npMontoOrig) { disp.textContent = fmt(v); disp.style.color = '#c0392b'; ncEl.textContent = 'Supera el original (' + fmt(npMontoOrig) + ')'; ncEl.style.color = '#c0392b'; }
+  else if (nc > 0) { disp.textContent = fmt(v); disp.style.color = '#1a1a18'; ncEl.textContent = 'NC por devolución: ' + fmt(nc); ncEl.style.color = '#c0392b'; }
+  else { disp.textContent = fmt(v); disp.style.color = '#1a7a3c'; ncEl.textContent = 'Sin devolución'; ncEl.style.color = '#aaa'; }
+}
+function nkConfirmar() {
+  if (!npComp) return;
+  const v = parseInt(npValor) || 0;
+  if (v > npMontoOrig) { alert('El monto no puede superar el original.'); return; }
+  if (v <= 0) { alert('Ingresá un monto mayor a cero.'); return; }
+  montosReales[npComp] = v;
+  document.getElementById('numpad-overlay').classList.remove('open');
+  npComp = null; npValor = '';
+  renderVentas();
+}
+
+// ============================================================
+// GUARDADO PARCIAL EN LA NUBE
+// ============================================================
+async function guardarProgreso() {
+  const btn = document.getElementById('btn-progreso');
+  btn.textContent = '💾 Guardando...';
+  btn.disabled = true;
+
+  const payload = {
+    action: 'guardarProgreso',
+    fecha: fechaDia,
+    codigo: repActual,
+    estados: estados,
+    montosReales: montosReales,
+    montosMixtos: montosMixtos,
+    motivosBaja: motivosBaja,
+  };
+
+  try {
+    await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    btn.textContent = '✓ Guardado';
+    setTimeout(() => { btn.textContent = '💾 Guardar'; btn.disabled = false; }, 2000);
+  } catch(err) {
+    btn.textContent = '⚠️ Error';
+    setTimeout(() => { btn.textContent = '💾 Guardar'; btn.disabled = false; }, 2000);
+  }
+}
+
+async function restaurarProgreso(codigo, fecha) {
+  try {
+    const resp = await fetch(SCRIPT_URL + `?action=getProgreso&codigo=${codigo}&fecha=${encodeURIComponent(fecha)}`, { method: 'GET' });
+    const data = await resp.json();
+    if (data.ok && data.progreso) {
+      estados = data.progreso.estados || {};
+      montosReales = data.progreso.montosReales || {};
+      montosMixtos = data.progreso.montosMixtos || {};
+      motivosBaja = data.progreso.motivosBaja || {};
+      return true;
+    }
+  } catch(err) {}
+  return false;
+}
+
+// ============================================================
+// NAVEGACION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function volverSel() { showScreen('screen-sel'); renderSel(); window.scrollTo(0, 0); }
+function volverRend() { showScreen('screen-rend'); window.scrollTo(0, 0); }
+
+// ============================================================
+// INICIO
+// ============================================================
+// No llamamos cargarDatos() automáticamente — esperamos el login
+</script>
+
+
+</body></html>
