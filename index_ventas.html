@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0060)file:///C:/Users/EstacionDulce/Downloads/index_ventas_3.html -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="es">
+<head>
+<meta charset="UTF-8">
 <title>Sistema de Ventas - Estación Dulce</title>
 <style>
   body { font-family: Arial, sans-serif; background:#f2f2f0; margin:0; padding:0; }
@@ -55,7 +55,7 @@
       <div id="itemsPedido"></div>
       <div class="total">Total: $<span id="totalPedido">0</span></div>
 
-      <button onclick="guardarPedido()" id="btnGuardar" disabled="">Guardar Pedido</button>
+      <button onclick="guardarPedido()" id="btnGuardar" disabled>Guardar Pedido</button>
       <div id="pedidoError" class="error"></div>
     </div>
   </div>
@@ -77,8 +77,6 @@ let carrito = []; // { producto, cantidad, precio }
 async function apiCall(payload) {
   const res = await fetch(API_URL, {
     method: 'POST',
-    redirect: 'follow',
-    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify(payload)
   });
   return res.json();
@@ -228,6 +226,5 @@ async function guardarPedido() {
   renderCarrito();
 }
 </script>
-
-
-</body></html>
+</body>
+</html>
