@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)file:///C:/Users/EstacionDulce/Downloads/index_ventas_19.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Ventas - Estación Dulce</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f2f2f0; margin:0; padding:0; }
+  .container { max-width:480px; margin:0 auto; padding:16px; }
+  h2 { color:#1F3864; }
+  input, select, button { width:100%; padding:10px; margin:6px 0; font-size:15px; box-sizing:border-box; }
+  button { background:#2E5395; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+  button:disabled { background:#aaa; }
+  .card { background:#fff; border-radius:6px; padding:14px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+  .cliente-item, .producto-item { padding:8px; border-bottom:1px solid #eee; cursor:pointer; }
+  .cliente-item:hover, .producto-item:hover { background:#f0f4fa; }
+  .item-pedido { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; }
+  .total { font-weight:bold; font-size:18px; text-align:right; margin-top:10px; }
+  .hidden { display:none; }
+  .small { font-size:12px; color:#666; }
+  .error { color:#c0392b; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="loginView" class="card">
+    <h2>Sistema de Ventas</h2>
+    <input id="loginUsuario" placeholder="Usuario" onkeydown="if(event.key===&#39;Enter&#39;)login()">
+    <input id="loginClave" placeholder="Contraseña" type="password" onkeydown="if(event.key===&#39;Enter&#39;)login()">
+    <button onclick="login()">Ingresar</button>
+    <div id="loginError" class="error"></div>
+  </div>
+
+  <!-- PEDIDO -->
+  <div id="pedidoView" class="hidden">
+    <div class="card">
+      <span class="small" id="vendedorInfo"></span>
+      <h2>Nuevo Pedido</h2>
+
+      <div id="vendedorSelector" style="display:none;margin-bottom:10px"></div>
+
+      <label>Cliente</label>
+      <input id="buscarCliente" placeholder="Escribí el nombre del cliente..." oninput="buscarClientes()" onkeydown="navLista(event,&#39;listaClientes&#39;,&#39;cliente&#39;)">
+      <div id="listaClientes"></div>
+      <div id="clienteSeleccionado" class="small"></div>
+
+    </div>
+
+    <div class="card">
+      <label>Producto</label>
+      <input id="buscarProducto" placeholder="25* oblita... (cantidad* producto)" oninput="buscarProductos()" onkeydown="navLista(event,&#39;listaProductos&#39;,&#39;producto&#39;)">
+      <div id="cantidadLabel" style="font-size:12px;font-weight:600;color:#1a56c4;min-height:18px;margin-top:2px"></div>
+      <div id="listaProductos"></div>
+
+      <div id="itemsPedido"></div>
+      <div class="total">Total: $<span id="totalPedido">0</span></div>
+
+      <button onclick="guardarPedido()" id="btnGuardar" disabled="">Guardar Pedido</button>
+      <div id="pedidoError" class="error"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxXJKTasdNf1rv7geIOpFhJA48gOw9Qgl7OoOYd26HPkifn6bIG0gvimPfS6e0dDn1A/exec';
+
+const NOMBRE_VENDEDOR = {
+  'V1': 'Franco Bulacio',
+  'V2': 'Matias Schiffito',
+  'V3': 'Michael Monjes',
+  'V4': 'Maximiliano Villaruel',
+  'V5': 'Juan Vallejos',
+  'V6': 'Axel Kardahi',
+  'V7': 'Santiago Villacorta',
+  'V8': 'Esteban Voss',
+  'V9': 'Luciano Ferreyra',
+};
+
+const REPARTIDOR_POR_VENDEDOR = {
+  'V1': 'R10 Kuki',
+  'V3': 'R16 Mauro',
+  'V4': 'R12 Leonel',
+  'V5': 'R12 Leonel',
+  'V2': 'R11 Paul',
+  'V6': 'R14 Fausto',
+  'V7': 'R14 Fausto',
+  'V8': 'R15 Mati',
+  'V9': 'R11 Paul',
+};
+
+let vendedor = null;
+let productosCache = [];
+let carrito = []; // { producto, cantidad, precio }
+
+async function apiCall(payload) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+async function login() {
+  const usuario = document.getElementById('loginUsuario').value;
+  const clave = document.getElementById('loginClave').value;
+  document.getElementById('loginError').innerText = '';
+  const r = await apiCall({ action: 'login', usuario, clave });
+  if (!r.ok) {
+    document.getElementById('loginError').innerText = r.error;
+    return;
+  }
+  vendedor = r.vendedor;
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('pedidoView').classList.remove('hidden');
+  document.getElementById('vendedorInfo').innerText = `${vendedor.nombre} — ${vendedor.deposito}`;
+
+  // repartidor fijo según vendedor (no admin)
+  if (!vendedor.esAdmin) {
+    vendedor.repartidor = REPARTIDOR_POR_VENDEDOR[vendedor.codigo] || '';
+  }
+
+  // Cargar productos primero (rápido) — pantalla usable de inmediato
+  document.getElementById('vendedorInfo').innerText += ' — Cargando...';
+  const rp = await apiCall({ action: 'getProductos' });
+  if (rp.ok) productosCache = rp.productos;
+  document.getElementById('vendedorInfo').innerText = vendedor.esAdmin
+    ? `Admin — ${vendedor.nombre}`
+    : `${vendedor.nombre} — ${vendedor.deposito}`;
+
+  // Cargar clientes en segundo plano sin bloquear
+  document.getElementById('buscarCliente').placeholder = 'Cargando clientes...';
+  apiCall({ action: 'getClientes' }).then(rc => {
+    if (rc.ok) {
+      clientesCache = vendedor.esAdmin
+        ? rc.clientes
+        : rc.clientes.filter(c => !c['Vendedor'] || c['Vendedor'] === vendedor.codigo);
+    }
+    document.getElementById('buscarCliente').placeholder = 'Escribí el nombre del cliente...';
+  });
+
+  // Selector de vendedor: solo admin
+  const selVend = document.getElementById('vendedorSelector');
+  if (vendedor.esAdmin) {
+    selVend.style.display = 'block';
+    const primerV = Object.keys(REPARTIDOR_POR_VENDEDOR)[0];
+    vendedor.codigoActual = primerV;
+    vendedor.repartidor = REPARTIDOR_POR_VENDEDOR[primerV];
+    const repsOpts = ['R10 Kuki','R12 Leonel','R16 Mauro','R11 Paul','R14 Fausto','R15 Mati']
+      .map(r => `<option value="${r}" ${r === vendedor.repartidor ? 'selected' : ''}>${r}</option>`).join('');
+    selVend.innerHTML =
+      '<label>Vendedor</label>' +
+      '<select id="vendedorSelect" onchange="cambiarVendedor(this.value)">' +
+        Object.entries(REPARTIDOR_POR_VENDEDOR).map(([v, r]) => `<option value="${v}">${v} - ${NOMBRE_VENDEDOR[v] || v}</option>`).join('') +
+      '</select>' +
+      '<label style="margin-top:8px;display:block">Repartidor</label>' +
+      '<select id="repartidorSelect" onchange="vendedor.repartidor=this.value">' + repsOpts + '</select>';
+  } else {
+    selVend.style.display = 'none';
+  }
+}
+
+let clienteSel = null;
+let clientesCache = [];
+function buscarClientes() {
+  const texto = document.getElementById('buscarCliente').value.toLowerCase().trim();
+  const div = document.getElementById('listaClientes');
+  if (texto.length < 2) { div.innerHTML = ''; return; }
+  const matches = clientesCache.filter(c =>
+    String(c['Nombre']).toLowerCase().includes(texto) ||
+    String(c['Id']).includes(texto)
+  ).slice(0, 30);
+  div.innerHTML = '';
+  matches.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'cliente-item';
+    item.innerText = `(ID ${c['Id']}) ${c['Nombre']} - ${c['Domicilio']}`;
+    item.onclick = () => seleccionarCliente(c);
+    div.appendChild(item);
+  });
+}
+
+function seleccionarCliente(c) {
+  clienteSel = c;
+  document.getElementById('listaClientes').innerHTML = '';
+  document.getElementById('buscarCliente').value = '';
+  document.getElementById('clienteSeleccionado').innerText = `Cliente: (ID ${c['Id']}) ${c['Nombre']}`;
+  actualizarBoton();
+}
+
+let cantidadPendiente = null;
+
+function buscarProductos() {
+  const input = document.getElementById('buscarProducto');
+  const raw = input.value;
+
+  // Detectar patrón cantidad* en cualquier posición (ej: "25*" o "25* oblita")
+  const matchCant = raw.match(/(\d+)\*(.*)/);
+  if (matchCant) {
+    cantidadPendiente = parseInt(matchCant[1]);
+    const resto = matchCant[2].trim();
+    input.value = resto;
+    actualizarLabelCantidad();
+    if (resto.length >= 2) buscarEnCache(resto.toLowerCase());
+    else document.getElementById('listaProductos').innerHTML = '';
+    return;
+  }
+
+  const texto = raw.toLowerCase().trim();
+  if (texto.length < 2) { document.getElementById('listaProductos').innerHTML = ''; return; }
+  buscarEnCache(texto);
+}
+
+function buscarEnCache(texto) {
+  const div = document.getElementById('listaProductos');
+  const matches = productosCache.filter(p =>
+    String(p['Codigo']).toLowerCase().includes(texto) ||
+    String(p['Descripcion']).toLowerCase().includes(texto)
+  ).slice(0, 20);
+  div.innerHTML = '';
+  matches.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'producto-item';
+    const cant = cantidadPendiente ? `[${cantidadPendiente}x] ` : '';
+    item.innerText = `${cant}${p['Descripcion']} - $${p['Precio']}`;
+    item.onclick = () => agregarProducto(p);
+    div.appendChild(item);
+  });
+}
+
+function actualizarLabelCantidad() {
+  const label = document.getElementById('cantidadLabel');
+  if (label) label.innerText = cantidadPendiente ? `Cantidad: ${cantidadPendiente}` : '';
+}
+
+function agregarProducto(p) {
+  const cant = cantidadPendiente || 1;
+  const existente = carrito.find(it => it.producto === p['Descripcion']);
+  if (existente) {
+    existente.cantidad += cant;
+  } else {
+    carrito.push({ producto: p['Descripcion'], cantidad: cant, precio: p['Precio'] });
+  }
+  cantidadPendiente = null;
+  document.getElementById('buscarProducto').value = '';
+  document.getElementById('listaProductos').innerHTML = '';
+  actualizarLabelCantidad();
+  renderCarrito();
+  // Foco de vuelta al buscador para el siguiente ítem
+  document.getElementById('buscarProducto').focus();
+}
+
+function renderCarrito() {
+  const div = document.getElementById('itemsPedido');
+  div.innerHTML = '';
+  let total = 0;
+  carrito.forEach((it, idx) => {
+    total += it.cantidad * it.precio;
+    const row = document.createElement('div');
+    row.className = 'item-pedido';
+    row.innerHTML = `
+      <span>${it.producto}</span>
+      <span>
+        <input type="number" min="1" value="${it.cantidad}" style="width:50px;display:inline-block"
+          onchange="cambiarCantidad(${idx}, this.value)">
+        x $${it.precio} = $${(it.cantidad*it.precio).toFixed(2)}
+        <button style="width:auto;padding:2px 8px;background:#c0392b" onclick="quitarItem(${idx})">x</button>
+      </span>`;
+    div.appendChild(row);
+  });
+  document.getElementById('totalPedido').innerText = total.toFixed(2);
+  actualizarBoton();
+}
+
+function cambiarCantidad(idx, valor) {
+  carrito[idx].cantidad = parseFloat(valor) || 1;
+  renderCarrito();
+}
+
+function quitarItem(idx) {
+  carrito.splice(idx, 1);
+  renderCarrito();
+}
+
+function actualizarBoton() {
+  document.getElementById('btnGuardar').disabled = !(clienteSel && carrito.length > 0);
+}
+
+async function guardarPedido() {
+  document.getElementById('pedidoError').innerText = '';
+  const pedido = {
+    fecha: new Date().toLocaleDateString('es-AR'),
+    vendedor: vendedor.esAdmin ? (vendedor.codigoActual || vendedor.codigo) : vendedor.nombre,
+    cliente: `(ID ${clienteSel['Id']}) ${clienteSel['Nombre']}`,
+    deposito: vendedor.deposito,
+    repartidor: vendedor.repartidor,
+    items: carrito
+  };
+  const r = await apiCall({ action: 'guardarPedido', pedido });
+  if (!r.ok) {
+    document.getElementById('pedidoError').innerText = r.error;
+    return;
+  }
+  alert(`Pedido guardado. Total: $${r.total.toFixed(2)}`);
+  carrito = [];
+  clienteSel = null;
+  document.getElementById('clienteSeleccionado').innerText = '';
+  renderCarrito();
+}
+
+// Navegación por teclado en listas
+let navIdx = { cliente: -1, producto: -1 };
+function navLista(e, listaId, tipo) {
+  const div = document.getElementById(listaId);
+  const items = div.querySelectorAll('.cliente-item, .producto-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    navIdx[tipo] = Math.min(navIdx[tipo] + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    navIdx[tipo] = Math.max(navIdx[tipo] - 1, 0);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const idx = navIdx[tipo] >= 0 ? navIdx[tipo] : 0;
+    if (items[idx]) items[idx].click();
+    navIdx[tipo] = -1;
+    return;
+  } else {
+    navIdx[tipo] = -1;
+  }
+  items.forEach((it, i) => {
+    it.style.background = i === navIdx[tipo] ? '#dce8fb' : '';
+    it.style.fontWeight = i === navIdx[tipo] ? '600' : '';
+  });
+  if (navIdx[tipo] >= 0) items[navIdx[tipo]].scrollIntoView({ block: 'nearest' });
+}
+
+function cambiarVendedor(codigo) {
+  vendedor.codigoActual = codigo;
+  vendedor.repartidor = REPARTIDOR_POR_VENDEDOR[codigo] || '';
+  const sel = document.getElementById('repartidorSelect');
+  if (sel) sel.value = vendedor.repartidor;
+}
+</script>
+
+
+</body></html>
