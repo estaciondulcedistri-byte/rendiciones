@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_45.html -->
+<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_46.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -394,6 +394,9 @@ function doLogout() {
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw6YsKihCeOIDtamdsMTSukRDFW1zp1uOTas3KrT_a_0DL_Uf92dawkTmdqf2vNGBMS/exec';
 // ============================================================
 
+// Botón MIXTO deshabilitado temporalmente (poner en true para reactivarlo)
+const MIXTO_HABILITADO = false;
+
 const fmt = n => '$' + Math.round(n).toLocaleString('es-AR');
 const extraInfo = v => `<span class="venta-extra-desktop">${v.fecha ? `<span>${v.fecha}</span>` : ''}${v.idCte ? `<span>ID ${v.idCte}</span>` : ''}</span>`;
 const esMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) || ('ontouchstart' in window && window.innerWidth < 768);
@@ -677,7 +680,7 @@ function ventaRow(v) {
     <div class="btn-group">
       <button class="est-btn${est === 'ef' ? ' act-ef' : ''}" onclick="setEst('${v.comp}','ef',${v.monto},${v.montoEF || v.monto})">EF</button>
       <button class="est-btn${est === 'tr' ? ' act-tr' : ''}" onclick="setEst('${v.comp}','tr',${v.monto},${v.montoEF || v.monto})">TR</button>
-      <button class="est-btn${est === 'mx' ? ' act-mx' : ''}" onclick="setEst('${v.comp}','mx',${v.monto},${v.montoEF || v.monto})">MIXTO</button>
+      ${MIXTO_HABILITADO ? `<button class="est-btn${est === 'mx' ? ' act-mx' : ''}" onclick="setEst('${v.comp}','mx',${v.monto},${v.montoEF || v.monto})">MIXTO</button>` : ''}
       <button class="est-btn${est === 'pe' ? ' act-pe' : ''}" onclick="setEst('${v.comp}','pe',${v.monto},${v.montoEF || v.monto})">PEND</button>
       <button class="est-btn${est === 'ba' ? ' act-ba' : ''}" onclick="setEst('${v.comp}','ba',${v.monto},${v.montoEF || v.monto})">BAJA</button>
     </div></div>${esMobile ? devolPanel : ''}${bajaPanel}</div>`;
@@ -1268,4 +1271,4 @@ function volverRend() { showScreen('screen-rend'); window.scrollTo(0, 0); }
 </script>
 
 
-</body></html> 
+</body></html>
