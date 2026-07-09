@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_46.html -->
+<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_47.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -66,6 +66,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tot-value{font-size:12px;font-weight:600}
 .tot-ef{color:#1a7a3c}.tot-tr{color:#1a56c4}.tot-pe{color:#8a6200}.tot-ba{color:#c0392b}.tot-sc{color:#aaa}
 .section-label{padding:8px 16px;font-size:11px;font-weight:600;color:#6b6b67;background:#f5f5f3;border-bottom:1px solid #e0dfd8;letter-spacing:.04em;text-transform:uppercase}
+.clasif-toggle{padding:11px 16px;font-size:12px;font-weight:600;color:#1a7a3c;background:#e6f4ea;border-top:1px solid #b7dfbf;border-bottom:1px solid #b7dfbf;cursor:pointer;user-select:none;letter-spacing:.02em}
+.clasif-toggle:active{background:#d9ede0}
 .venta-row{background:#fff;border-bottom:2px solid #d0d0cc}
 .venta-row.vale-row{opacity:.5;background:#fafaf8}
 .venta-row.pend1{background:#ffe8c0;border-left:4px solid #f5a623;border-top:1px solid #f5a623;border-bottom:1px solid #f5a623}
@@ -195,6 +197,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .tot-label{font-size:7px;margin-bottom:0}
   .tot-value{font-size:10px}
   .section-label{padding:3px 16px;font-size:10px}
+  .clasif-toggle{padding:5px 16px;font-size:10px}
   .venta-main{padding:4px 12px}
   .venta-cliente{font-size:12px}
   .venta-comp{font-size:9px}
@@ -527,19 +530,49 @@ async function abrirRep(codigo) {
   window.scrollTo(0, 0);
 }
 
+let clasifAbierto = false;
+
 function renderVentas() {
   const vv = ventas[repActual] || [];
-  const pend = vv.filter(v => v.tipo === 'pend');
-  const dia = vv.filter(v => v.tipo === 'dia');
+  const pendAll = vv.filter(v => v.tipo === 'pend');
+  const diaAll = vv.filter(v => v.tipo === 'dia');
+  const esClasificada = v => estados[v.comp] !== null && estados[v.comp] !== undefined;
   let html = '';
-  if (pend.length) {
-    html += `<div class="section-label">Pendientes arrastrados — ${pend.length} boleta${pend.length > 1 ? 's' : ''}</div>`;
-    html += pend.map(v => ventaRow(v)).join('');
+
+  if (esMobile) {
+    const pend = pendAll.filter(v => !esClasificada(v));
+    const dia = diaAll.filter(v => !esClasificada(v));
+    const clasificadas = pendAll.filter(esClasificada).concat(diaAll.filter(esClasificada));
+
+    if (pend.length) {
+      html += `<div class="section-label">Pendientes arrastrados — ${pend.length} boleta${pend.length > 1 ? 's' : ''}</div>`;
+      html += pend.map(v => ventaRow(v)).join('');
+    }
+    html += `<div class="section-label">Ventas del día ${fechaDia} — ${dia.length} boleta${dia.length > 1 ? 's' : ''}</div>`;
+    html += dia.map(v => ventaRow(v)).join('');
+
+    if (clasificadas.length) {
+      html += `<div class="clasif-toggle" onclick="toggleClasificadas()">
+        <span>${clasifAbierto ? '▲' : '▼'}</span>&nbsp; ✓ Clasificadas (${clasificadas.length})
+      </div>`;
+      html += `<div id="clasif-list" style="display:${clasifAbierto ? 'block' : 'none'}">${clasificadas.map(v => ventaRow(v)).join('')}</div>`;
+    }
+  } else {
+    if (pendAll.length) {
+      html += `<div class="section-label">Pendientes arrastrados — ${pendAll.length} boleta${pendAll.length > 1 ? 's' : ''}</div>`;
+      html += pendAll.map(v => ventaRow(v)).join('');
+    }
+    html += `<div class="section-label">Ventas del día ${fechaDia} — ${diaAll.length} boleta${diaAll.length > 1 ? 's' : ''}</div>`;
+    html += diaAll.map(v => ventaRow(v)).join('');
   }
-  html += `<div class="section-label">Ventas del día ${fechaDia} — ${dia.length} boleta${dia.length > 1 ? 's' : ''}</div>`;
-  html += dia.map(v => ventaRow(v)).join('');
+
   document.getElementById('ventas-list').innerHTML = html;
   actualizarTotales();
+}
+
+function toggleClasificadas() {
+  clasifAbierto = !clasifAbierto;
+  renderVentas();
 }
 
 function ventaRow(v) {
@@ -726,12 +759,6 @@ function setEst(comp, est, montoTR, montoEF) {
   if (est === 'mx' && prev !== 'mx') { delete montosReales[comp]; if (!montosMixtos[comp]) montosMixtos[comp] = { ef: 0, tr: 0 }; }
   if (estados[comp] === null) delete montosMixtos[comp];
   renderVentas();
-
-  // En mobile: abrir numpad automáticamente al tocar EF o TR
-  if (esMobile && (nuevoEst === 'ef' || nuevoEst === 'tr') && prev !== nuevoEst) {
-    const base = nuevoEst === 'ef' ? montoEF : montoTR;
-    setTimeout(() => abrirNumpad(comp, base, montoEF), 50);
-  }
 }
 
 function confirmarBajaModal() {
