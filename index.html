@@ -185,26 +185,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* LANDSCAPE MOBILE — comprime header/footer para ver más boletas */
 @media(orientation:landscape) and (max-height:500px){
-  .rend-header{padding:5px 12px}
-  .rend-header-top{margin-bottom:5px;gap:8px}
-  .back-btn{padding:4px 9px;font-size:11px}
-  .rend-rep-name{font-size:13px}
-  .totales-bar{gap:4px}
-  .tot-item{padding:3px 5px}
-  .tot-label{font-size:8px;margin-bottom:0}
-  .tot-value{font-size:11px}
-  .section-label{padding:4px 16px;font-size:10px}
-  .venta-main{padding:5px 12px}
+  .rend-header{padding:4px 10px;display:flex;align-items:center;gap:10px}
+  .rend-header-top{margin-bottom:0;gap:6px;flex:0 0 auto}
+  .back-btn{padding:3px 7px;font-size:10px}
+  .rend-rep-name{font-size:12px;flex:none;white-space:nowrap}
+  .totales-bar{flex:1;gap:3px}
+  .tot-item{padding:2px 4px}
+  .tot-label{font-size:7px;margin-bottom:0}
+  .tot-value{font-size:10px}
+  .section-label{padding:3px 16px;font-size:10px}
+  .venta-main{padding:4px 12px}
   .venta-cliente{font-size:12px}
   .venta-comp{font-size:9px}
   .monto-orig,.monto-real{font-size:12px}
-  .est-btn{padding:5px 7px;font-size:10px}
-  .rend-footer{padding:6px 12px}
+  .est-btn{padding:4px 6px;font-size:10px}
+  .rend-footer{padding:5px 12px}
   .progress-wrap{display:flex;align-items:center;gap:8px}
   .progress-label{margin-bottom:0;white-space:nowrap;flex-shrink:0}
   .progress-bar{flex:1}
-  .guardar-btn{padding:7px 12px;font-size:12px}
-  #screen-rend > div[style*="height:80px"]{height:56px}
+  .guardar-btn{padding:6px 10px;font-size:11px}
+  #screen-rend > div[style*="height:80px"]{height:50px}
 }
 </style>
 </head>
@@ -223,7 +223,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="login-field">
         <label class="login-label">Contraseña</label>
-        <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
       </div>
       <button class="login-btn" onclick="doLogin()">Ingresar</button>
     </div>
@@ -316,10 +316,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="numpad-display" id="np-display"><span class="hint">Ingresá el monto cobrado</span></div>
     <div class="numpad-nc" id="np-nc"></div>
     <div class="numpad-grid">
-      <button class="nk" onclick="nkPress('7')">7</button><button class="nk" onclick="nkPress('8')">8</button><button class="nk" onclick="nkPress('9')">9</button>
-      <button class="nk" onclick="nkPress('4')">4</button><button class="nk" onclick="nkPress('5')">5</button><button class="nk" onclick="nkPress('6')">6</button>
-      <button class="nk" onclick="nkPress('1')">1</button><button class="nk" onclick="nkPress('2')">2</button><button class="nk" onclick="nkPress('3')">3</button>
-      <button class="nk" onclick="nkPress('000')">000</button><button class="nk" onclick="nkPress('0')">0</button><button class="nk del" onclick="nkPress('del')">⌫</button>
+      <button class="nk" onclick="nkPress(&#39;7&#39;)">7</button><button class="nk" onclick="nkPress(&#39;8&#39;)">8</button><button class="nk" onclick="nkPress(&#39;9&#39;)">9</button>
+      <button class="nk" onclick="nkPress(&#39;4&#39;)">4</button><button class="nk" onclick="nkPress(&#39;5&#39;)">5</button><button class="nk" onclick="nkPress(&#39;6&#39;)">6</button>
+      <button class="nk" onclick="nkPress(&#39;1&#39;)">1</button><button class="nk" onclick="nkPress(&#39;2&#39;)">2</button><button class="nk" onclick="nkPress(&#39;3&#39;)">3</button>
+      <button class="nk" onclick="nkPress(&#39;000&#39;)">000</button><button class="nk" onclick="nkPress(&#39;0&#39;)">0</button><button class="nk del" onclick="nkPress(&#39;del&#39;)">⌫</button>
       <button class="nk ok" onclick="nkConfirmar()">Confirmar</button>
     </div>
   </div>
@@ -335,7 +335,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="baja-modal" onclick="event.stopPropagation()">
     <div class="baja-modal-title">⚠️ Motivo de baja</div>
     <div class="baja-modal-cliente" id="baja-modal-cliente"></div>
-    <input class="baja-modal-input" id="baja-modal-input" type="text" placeholder="Escribí el motivo de la baja..." onkeydown="if(event.key==='Enter')confirmarBajaModal()">
+    <input class="baja-modal-input" id="baja-modal-input" type="text" placeholder="Escribí el motivo de la baja..." onkeydown="if(event.key===&#39;Enter&#39;)confirmarBajaModal()">
     <div class="baja-modal-btns">
       <button class="baja-cancel" onclick="cerrarBajaModal()">Cancelar</button>
       <button class="baja-ok" onclick="confirmarBajaModal()">Confirmar baja</button>
