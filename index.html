@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_47.html -->
+<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_48.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,6 +28,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .login-label{font-size:12px;font-weight:600;color:#6b6b67;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.04em}
 .login-input{width:100%;padding:11px 14px;font-size:15px;border:1.5px solid #e0dfd8;border-radius:8px;background:#fff;color:#1a1a18;outline:none}
 .login-input:focus{border-color:#1a1a18}
+.pass-wrap{position:relative}
+.pass-wrap .login-input{padding-right:44px}
+.pass-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:none;background:transparent;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;opacity:.6}
+.pass-toggle:active{opacity:1}
 .login-btn{width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:#1a1a18;color:#fff;margin-top:6px}
 .login-btn:active{opacity:.85}
 .login-error{background:#fde8e8;color:#c0392b;border:1px solid #f5b7b7;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
@@ -227,7 +231,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="login-field">
         <label class="login-label">Contraseña</label>
-        <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
+        <div class="pass-wrap">
+          <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
+          <button type="button" class="pass-toggle" id="pass-toggle-btn" onclick="togglePass()" aria-label="Mostrar contraseña">👁️</button>
+        </div>
       </div>
       <button class="login-btn" onclick="doLogin()">Ingresar</button>
     </div>
@@ -389,6 +396,13 @@ function doLogout() {
   document.getElementById('login-usuario').value = '';
   document.getElementById('login-pass').value = '';
   showScreen('screen-login');
+}
+
+function togglePass() {
+  const inp = document.getElementById('login-pass');
+  const btn = document.getElementById('pass-toggle-btn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
 }
 
 // ============================================================
