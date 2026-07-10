@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_48.html -->
+<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_53.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -706,18 +706,22 @@ function ventaRow(v) {
     </div>`;
   }
 
-  // En desktop: input inline en la misma fila, sin panel separado
+  // En desktop: input siempre presente (editable), con navegación por teclado E/T/M/P/B + Tab/Enter
   let inlineInput = '';
-  if (!esMobile && (est === 'ef' || est === 'tr')) {
+  if (!esMobile) {
+    const idSafe = v.comp.replace(/\W/g,'_');
     const baseActual = est === 'ef' ? (v.montoEF || v.monto) : v.monto;
-    const valActual = mr !== undefined ? mr : baseActual;
+    const valActual = mr !== undefined ? mr : (est ? baseActual : v.monto);
     const tieneDevol2 = mr !== undefined && mr < baseActual;
-    inlineInput = `<input class="devol-input-desktop" style="width:120px;margin:0 4px" type="number" 
-      id="inp-${v.comp.replace(/\W/g,'_')}"
-      value="${Math.round(valActual)}" min="1" max="${baseActual}" step="1"
-      oninput="setMontoRealDesktop('${v.comp}',this.value,${baseActual})"
-      onblur="validarMontoDesktop('${v.comp}',this,${baseActual})">
-    <span id="nc-${v.comp.replace(/\W/g,'_')}" style="font-size:11px;font-weight:600;white-space:nowrap" class="${tieneDevol2 ? 'devol-nc' : 'devol-ok'}">${tieneDevol2 ? 'NC: ' + fmt(nc) : ''}</span>`;
+    inlineInput = `<input class="devol-input-desktop" style="width:120px;margin:0 4px" type="number"
+      id="inp-${idSafe}" data-comp="${v.comp}"
+      value="${Math.round(valActual)}" min="1" max="${Math.round(baseActual)}" step="1"
+      oninput="handleInlineInput('${v.comp}',this.value)"
+      onblur="validarMontoDesktopSoft('${v.comp}',this)"
+      onkeydown="handleKeyNav(event,'${v.comp}',${v.monto},${v.montoEF || v.monto})">`;
+    if (est === 'ef' || est === 'tr') {
+      inlineInput += `<span id="nc-${idSafe}" style="font-size:11px;font-weight:600;white-space:nowrap" class="${tieneDevol2 ? 'devol-nc' : 'devol-ok'}">${tieneDevol2 ? 'NC: ' + fmt(nc) : ''}</span>`;
+    }
     devolPanel = ''; // no usar panel separado en desktop
   }
 
@@ -825,6 +829,54 @@ function validarMontoDesktop(comp, input, montoBase) {
     if (span) { span.className = 'devol-ok'; span.textContent = 'Sin devolución'; }
   } else { montosReales[comp] = v; }
   actualizarTotales();
+}
+
+// El input de monto está siempre presente en desktop (ver ventaRow). Estas funciones
+// hacen que escribir un monto solo tenga efecto si la boleta ya está clasificada como EF/TR.
+function handleInlineInput(comp, valor) {
+  const est = estados[comp];
+  if (est !== 'ef' && est !== 'tr') return;
+  const v = (ventas[repActual] || []).find(x => x.comp === comp);
+  if (!v) return;
+  const baseActual = est === 'ef' ? (v.montoEF || v.monto) : v.monto;
+  setMontoRealDesktop(comp, valor, baseActual);
+}
+
+function validarMontoDesktopSoft(comp, input) {
+  const est = estados[comp];
+  if (est !== 'ef' && est !== 'tr') return;
+  const v = (ventas[repActual] || []).find(x => x.comp === comp);
+  if (!v) return;
+  const baseActual = est === 'ef' ? (v.montoEF || v.monto) : v.monto;
+  validarMontoDesktop(comp, input, baseActual);
+}
+
+function focusInputBoleta(comp) {
+  const el = document.getElementById('inp-' + comp.replace(/\W/g,'_'));
+  if (el) { el.focus(); if (el.select) el.select(); }
+}
+
+function listaNavegable() {
+  return (ventas[repActual] || []).filter(v => !v.vale && v.monto > 0);
+}
+
+// Atajos de teclado en desktop: E=EF, T=TR, M=MIXTO, P=PEND, B=BAJA, Tab/Enter=siguiente boleta, Escape=salir del input
+function handleKeyNav(e, comp, montoTR, montoEF) {
+  const k = e.key;
+  const kl = k.toLowerCase();
+  if (kl === 'e') { e.preventDefault(); setEst(comp, 'ef', montoTR, montoEF); setTimeout(() => focusInputBoleta(comp), 0); return; }
+  if (kl === 't') { e.preventDefault(); setEst(comp, 'tr', montoTR, montoEF); setTimeout(() => focusInputBoleta(comp), 0); return; }
+  if (kl === 'm' && MIXTO_HABILITADO) { e.preventDefault(); setEst(comp, 'mx', montoTR, montoEF); setTimeout(() => focusInputBoleta(comp), 0); return; }
+  if (kl === 'p') { e.preventDefault(); setEst(comp, 'pe', montoTR, montoEF); setTimeout(() => focusInputBoleta(comp), 0); return; }
+  if (kl === 'b') { e.preventDefault(); setEst(comp, 'ba', montoTR, montoEF); setTimeout(() => focusInputBoleta(comp), 0); return; }
+  if (k === 'Escape') { e.target.blur(); return; }
+  if (k === 'Tab' || k === 'Enter') {
+    e.preventDefault();
+    const lista = listaNavegable();
+    const idx = lista.findIndex(v => v.comp === comp);
+    if (idx >= 0 && idx < lista.length - 1) focusInputBoleta(lista[idx + 1].comp);
+    return;
+  }
 }
 
 function actualizarTotales() {
