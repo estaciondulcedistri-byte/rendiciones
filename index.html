@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_53.html -->
+<!-- saved from url=(0054)file:///C:/Users/EstacionDulce/Downloads/index_54.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -170,6 +170,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tr-field.full{grid-column:span 2}
 .tr-label{font-size:10px;color:#6b6b67;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;display:block}
 .tr-input{width:100%;padding:8px 10px;font-size:13px;border:1.5px solid #e0dfd8;border-radius:7px;background:#fff;color:#1a1a18}
+.tr-input.tr-prefilled{background:#f5f5f3;color:#6b6b67;font-weight:600}
+.tr-input.tr-pending{border-color:#f5a623;background:#fff8ec}
+.tr-input.tr-pending::placeholder{color:#c07830}
 .tr-input:focus{outline:none;border-color:#1a1a18}
 .tr-remove{position:absolute;top:8px;right:8px;width:24px;height:24px;border:none;background:#fde8e8;color:#c0392b;border-radius:50%;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .add-tr-btn{width:100%;padding:11px;font-size:13px;font-weight:600;border:1.5px dashed #c0c0bc;border-radius:10px;background:transparent;color:#6b6b67;cursor:pointer;margin-bottom:8px}
@@ -967,9 +970,11 @@ function mostrarResumen() {
   if (Object.keys(billetes).length === 0) {
     DENOMINACIONES.forEach(d => billetes[d] = 0);
   }
-  // Inicializar con 1 transferencia vacía si no hay ninguna y hay monto TR
+  // Precargar una transferencia por cada cliente con boletas TR/MIXTO, con cliente y monto ya asignados
   if (transferencias.length === 0 && tr > 0) {
-    transferencias.push({ id: ++trIdCounter, idCte: '', titular: '', monto: '', fecha: '', cuit: '' });
+    clientesTrMx().forEach(c => {
+      transferencias.push({ id: ++trIdCounter, idCte: c.idCte, titular: '', monto: Math.round(c.total), fecha: '', cuit: '' });
+    });
   }
 
   document.getElementById('resumen-content').innerHTML = `
@@ -1041,20 +1046,22 @@ function trCard(t) {
   const opciones = clientesTrMx().map(c =>
     `<option value="${c.idCte}" ${t.idCte === c.idCte ? 'selected' : ''}>${c.cliente} (${fmt(c.total)})</option>`
   ).join('');
+  const faltaTitular = !t.titular;
+  const faltaFecha = !t.fecha;
   return `<div class="tr-card" id="trc-${t.id}">
     <button class="tr-remove" onclick="removeTransferencia(${t.id})">×</button>
     <div class="tr-grid">
       <div class="tr-field full"><span class="tr-label">Cliente (boletas TR/MIXTO)</span>
-        <select class="tr-input" onchange="setTr(${t.id},'idCte',this.value)">
+        <select class="tr-input tr-prefilled" onchange="setTr(${t.id},'idCte',this.value)">
           <option value="">— Seleccionar cliente —</option>
           ${opciones}
         </select></div>
       <div class="tr-field full"><span class="tr-label">Titular de la cuenta (quien transfirió)</span>
-        <input class="tr-input" type="text" placeholder="Nombre y apellido" value="${t.titular}" oninput="setTr(${t.id},'titular',this.value)"></div>
-      <div class="tr-field"><span class="tr-label">Monto</span>
+        <input class="tr-input${faltaTitular ? ' tr-pending' : ''}" type="text" placeholder="Nombre y apellido — falta completar" value="${t.titular}" oninput="setTr(${t.id},'titular',this.value)"></div>
+      <div class="tr-field"><span class="tr-label">Monto (editá si fue parcial)</span>
         <input class="tr-input" type="number" min="0" placeholder="$0" value="${t.monto}" oninput="setTr(${t.id},'monto',this.value)"></div>
       <div class="tr-field"><span class="tr-label">Fecha</span>
-        <input class="tr-input" type="date" value="${t.fecha}" oninput="setTr(${t.id},'fecha',this.value)"></div>
+        <input class="tr-input${faltaFecha ? ' tr-pending' : ''}" type="date" value="${t.fecha}" oninput="setTr(${t.id},'fecha',this.value)"></div>
       <div class="tr-field full"><span class="tr-label">CUIT / CUIL de origen</span>
         <input class="tr-input" type="text" placeholder="20-XXXXXXXX-X" value="${t.cuit}" oninput="setTr(${t.id},'cuit',this.value)"></div>
       <div class="tr-field full" id="tr-aviso-${t.id}">${avisoTr(t)}</div>
@@ -1066,8 +1073,12 @@ function avisoTr(t) {
   if (!t.idCte) return '';
   const c = clientesTrMx().find(c => c.idCte === t.idCte);
   const cap = c ? c.total : 0;
-  if (parseFloat(t.monto) > cap + 1) {
+  const monto = parseFloat(t.monto) || 0;
+  if (monto > cap + 1) {
     return `<span style="color:#c0392b;font-size:12px;font-weight:600">⚠️ Este cliente tiene ${fmt(cap)} en boletas TR/MIXTO. El monto declarado lo supera — revisar.</span>`;
+  }
+  if (monto > 0 && monto < cap - 1) {
+    return `<span style="color:#8a6200;font-size:12px;font-weight:600">ℹ️ Transferencia parcial: faltan ${fmt(cap - monto)} de este cliente, quedan en Saldo Cons.</span>`;
   }
   return '';
 }
