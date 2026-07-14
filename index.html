@@ -1044,7 +1044,7 @@ function setBillete(denom, valor) {
 // ============================================================
 function trCard(t) {
   const opciones = clientesTrMx().map(c =>
-    `<option value="${c.idCte}" ${t.idCte === c.idCte ? 'selected' : ''}>${c.cliente} (${fmt(c.total)})</option>`
+    `<option value="${c.idCte}" ${t.idCte === c.idCte ? 'selected' : ''}>(ID ${c.idCte}) ${c.cliente} (${fmt(c.total)})</option>`
   ).join('');
   const faltaTitular = !t.titular;
   const faltaFecha = !t.fecha;
