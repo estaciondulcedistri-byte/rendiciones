@@ -1257,10 +1257,17 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
   };
 
   try {
-    await fetch(SCRIPT_URL, {
+    const resp = await fetch(SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+    const respData = await resp.json();
+    if (!respData.ok) {
+      document.getElementById('saving-overlay').classList.remove('open');
+      btn.disabled = false;
+      alert('⚠️ No se pudo guardar:\n\n' + (respData.error || 'Error desconocido') + '\n\nCorregí y volvé a confirmar.');
+      return;
+    }
     rendGuardadas[repActual] = { ef, tr, pe, ba, vale: valeIntegrado, nc, totalRendir: rep.totalRendir };
     billetes = {}; transferencias = []; trIdCounter = 0; valeIntegrado = 0; boletasExtra = []; bexIdCounter = 0;
     document.getElementById('saving-overlay').classList.remove('open');
