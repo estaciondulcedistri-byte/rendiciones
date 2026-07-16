@@ -1224,23 +1224,6 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
 
   const transferenciasValidas = transferencias.filter(t => t.titular || t.monto);
 
-  // Verificar si hay transferencias ya rendidas
-  if (transferenciasValidas.length > 0) {
-    try {
-      const verif = await fetch(SCRIPT_URL + '?action=verificarTransferencias&transferencias=' + encodeURIComponent(JSON.stringify(transferenciasValidas)));
-      const verifData = await verif.json();
-      if (verifData.ok && verifData.yaRendidas && verifData.yaRendidas.length > 0) {
-        document.getElementById('saving-overlay').classList.remove('open');
-        btn.disabled = false;
-        const lista = verifData.yaRendidas.map(t => `• $${t.monto} - ${t.titular} - ${t.fecha} (rendida por ${t.rendidoPor})`).join('\n');
-        alert(`⚠️ ATENCIÓN: Las siguientes transferencias ya fueron rendidas anteriormente y NO se pueden acreditar de nuevo:\n\n${lista}\n\nCorregí las transferencias antes de confirmar.`);
-        return;
-      }
-    } catch(e) {
-      // Si falla la verificación, continuar igual (no bloquear)
-    }
-  }
-
   const payload = {
     action: 'guardarRendicion',
     fecha: fechaDia,
