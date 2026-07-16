@@ -493,7 +493,7 @@ function renderSel() {
   }
 
   document.getElementById('rep-grid').innerHTML = repsVisibles.map(r => {
-    const done = rendGuardadas[r.codigo];
+    const done = rendGuardadas[r.codigo + '|' + fechaDia];
     return `<div class="rep-card${done ? ' done' : ''}" ${done ? '' : `onclick="abrirRep('${r.codigo}')"`}>
       <div class="avatar">${r.apodo.substring(0,2).toUpperCase()}</div>
       <div>
@@ -506,7 +506,7 @@ function renderSel() {
     </div>`;
   }).join('');
 
-  const keys = Object.keys(rendGuardadas);
+  const keys = Object.keys(rendGuardadas).filter(k => k.endsWith('|' + fechaDia));
   if (keys.length > 0) {
     let ef = 0, tr = 0, pe = 0, tot = 0;
     keys.forEach(c => { const d = rendGuardadas[c]; ef += d.ef; tr += d.tr; pe += d.pe; tot += d.totalRendir; });
@@ -1268,7 +1268,7 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
       alert('⚠️ No se pudo guardar:\n\n' + (respData.error || 'Error desconocido') + '\n\nCorregí y volvé a confirmar.');
       return;
     }
-    rendGuardadas[repActual] = { ef, tr, pe, ba, vale: valeIntegrado, nc, totalRendir: rep.totalRendir };
+    rendGuardadas[repActual + '|' + fechaDia] = { ef, tr, pe, ba, vale: valeIntegrado, nc, totalRendir: rep.totalRendir };
     billetes = {}; transferencias = []; trIdCounter = 0; valeIntegrado = 0; boletasExtra = []; bexIdCounter = 0;
     document.getElementById('saving-overlay').classList.remove('open');
     showScreen('screen-sel');
