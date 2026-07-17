@@ -1057,11 +1057,11 @@ function trCard(t) {
           ${opciones}
         </select></div>
       <div class="tr-field full"><span class="tr-label">Titular de la cuenta (quien transfirió)</span>
-        <input class="tr-input${faltaTitular ? ' tr-pending' : ''}" type="text" placeholder="Nombre y apellido — falta completar" value="${t.titular}" oninput="setTr(${t.id},'titular',this.value)"></div>
+        <input class="tr-input${faltaTitular ? ' tr-pending' : ''}" type="text" placeholder="Nombre y apellido — falta completar" value="${t.titular}" oninput="setTr(${t.id},'titular',this.value); this.classList.toggle('tr-pending', !this.value.trim())"></div>
       <div class="tr-field"><span class="tr-label">Monto (editá si fue parcial)</span>
         <input class="tr-input" type="number" min="0" placeholder="$0" value="${t.monto}" oninput="setTr(${t.id},'monto',this.value)"></div>
       <div class="tr-field"><span class="tr-label">Fecha</span>
-        <input class="tr-input${faltaFecha ? ' tr-pending' : ''}" type="date" value="${t.fecha}" oninput="setTr(${t.id},'fecha',this.value)"></div>
+        <input class="tr-input${faltaFecha ? ' tr-pending' : ''}" type="date" value="${t.fecha}" oninput="setTr(${t.id},'fecha',this.value); this.classList.toggle('tr-pending', !this.value)"></div>
       <div class="tr-field full"><span class="tr-label">CUIT / CUIL de origen</span>
         <input class="tr-input" type="text" placeholder="20-XXXXXXXX-X" value="${t.cuit}" oninput="setTr(${t.id},'cuit',this.value)"></div>
       <div class="tr-field full" id="tr-aviso-${t.id}">${avisoTr(t)}</div>
