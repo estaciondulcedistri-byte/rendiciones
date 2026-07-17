@@ -1269,8 +1269,7 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
 // ============================================================
 function abrirNumpad(comp, montoBase, montoEF) {
   npComp = comp; npMontoOrig = montoBase; npMontoEF = montoEF;
-  const mr = montosReales[comp];
-  npValor = mr !== undefined ? String(Math.round(mr)) : '';
+  npValor = '';
   actualizarNumpadDisplay();
   document.getElementById('numpad-overlay').classList.add('open');
 }
