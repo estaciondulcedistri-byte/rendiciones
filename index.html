@@ -1095,15 +1095,18 @@ function capacidadTransferencia() {
 
 function clientesTrMx() {
   const vv = ventas[repActual] || [];
-  const map = {};
+  // Map en vez de objeto: un objeto reordena solo las claves que parecen
+  // número (como los Id.Cte) de menor a mayor, sin importar el orden real
+  // de aparición en el consolidado. Map conserva el orden de inserción siempre.
+  const map = new Map();
   vv.forEach(v => {
     const e = estados[v.comp];
     if (e !== 'tr' && e !== 'mx') return;
     const key = v.idCte || v.cliente;
-    if (!map[key]) map[key] = { idCte: key, cliente: v.cliente, total: 0 };
-    map[key].total += v.monto;
+    if (!map.has(key)) map.set(key, { idCte: key, cliente: v.cliente, total: 0 });
+    map.get(key).total += v.monto;
   });
-  return Object.values(map);
+  return Array.from(map.values());
 }
 
 function addTransferencia() {
