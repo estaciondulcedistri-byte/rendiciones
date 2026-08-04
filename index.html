@@ -1227,6 +1227,13 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
 
   const transferenciasValidas = transferencias.filter(t => t.titular || t.monto);
 
+  // Boletas que quedaron PEND en esta rendición, con su tipo original (pend =
+  // ya venía pendiente de antes, dia = recién quedó pendiente hoy) — esto es
+  // lo que alimenta el consolidado del día siguiente.
+  const pendientesDetalle = (ventas[repActual] || [])
+    .filter(v => v.comp !== 'SALDO' && estados[v.comp] === 'pe')
+    .map(v => ({ fecha: v.fecha, numero: v.comp, idCte: v.idCte, cliente: v.cliente, total: v.monto, montoEF: v.montoEF, tipo: v.tipo }));
+
   const payload = {
     action: 'guardarRendicion',
     fecha: fechaDia,
@@ -1239,7 +1246,8 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
     totalContado: totalBilletes(),
     transferencias: transferenciasValidas,
     totalTransferenciasDetalle: totalTransferencias(),
-    boletasExtra: boletasExtra
+    boletasExtra: boletasExtra,
+    pendientes: pendientesDetalle
   };
 
   try {
