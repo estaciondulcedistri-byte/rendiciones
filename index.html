@@ -286,7 +286,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="screen" id="screen-rend">
   <div class="rend-header">
     <div class="rend-header-top">
-      <button class="back-btn" onclick="volverSel()">← Volver</button>
+      <button class="back-btn" onclick="history.back()">← Volver</button>
       <div class="rend-rep-name" id="rend-rep-name"></div>
       <button class="back-btn" style="background:#e6f4ea;color:#1a7a3c;border-color:#b7dfbf;font-weight:600" onclick="marcarTodoEF()">Marcar todo EF</button>
     </div>
@@ -322,7 +322,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="screen" id="screen-resumen">
   <div class="resumen-wrap">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <button class="back-btn" onclick="volverRend()">← Revisar</button>
+      <button class="back-btn" onclick="history.back()">← Revisar</button>
       <div style="font-size:16px;font-weight:600" id="resumen-titulo"></div>
     </div>
     <div id="resumen-content"></div>
@@ -460,6 +460,7 @@ async function cargarDatos(fecha) {
     fechasDisponibles = data.fechasDisponibles || {};
 
     document.getElementById('sel-titulo').textContent = 'Rendición — ' + fechaDia;
+    history.replaceState({ screen: 'screen-sel' }, '');
     showScreen('screen-sel');
     renderSel();
   } catch (err) {
@@ -554,6 +555,7 @@ async function abrirRep(codigo) {
   }
   
   renderVentas();
+  history.pushState({ screen: 'screen-rend' }, '');
   showScreen('screen-rend');
   window.scrollTo(0, 0);
 }
@@ -1032,7 +1034,8 @@ function mostrarResumen() {
     <div id="alert-final">${alertFinalHTML()}</div>
 
     <button class="confirm-btn" id="btn-confirmar" onclick="confirmarRendicion(${ef},${tr},${pe},${ba},${vale},${nc},${cierra},${descEF},${devol},${totalRendir})">Confirmar rendición de ${rep.apodo}</button>
-    <button class="back-btn" style="width:100%;margin-top:10px;text-align:center;display:block;padding:10px" onclick="volverRend()">← Volver a revisar</button>`;
+    <button class="back-btn" style="width:100%;margin-top:10px;text-align:center;display:block;padding:10px" onclick="history.back()">← Volver a revisar</button>`;
+  history.pushState({ screen: 'screen-resumen' }, '');
   showScreen('screen-resumen');
   window.scrollTo(0, 0);
 }
@@ -1276,6 +1279,7 @@ async function confirmarRendicion(ef, tr, pe, ba, vale, nc, cierra, descEF, devo
     rendGuardadas[repActual + '|' + fechaDia] = { ef, tr, pe, ba, vale: valeIntegrado, nc, totalRendir: rep.totalRendir };
     billetes = {}; transferencias = []; trIdCounter = 0; valeIntegrado = 0; boletasExtra = []; bexIdCounter = 0;
     document.getElementById('saving-overlay').classList.remove('open');
+    history.replaceState({ screen: 'screen-sel' }, '');
     showScreen('screen-sel');
     renderSel();
     window.scrollTo(0, 0);
@@ -1378,6 +1382,16 @@ function showScreen(id) {
 }
 function volverSel() { showScreen('screen-sel'); renderSel(); window.scrollTo(0, 0); }
 function volverRend() { showScreen('screen-rend'); window.scrollTo(0, 0); }
+
+// El botón "atrás" del teléfono dispara popstate en vez de salir de la app,
+// porque cada pantalla (sel/rend/resumen) pushea su propio estado de historial.
+window.addEventListener('popstate', (e) => {
+  const screen = e.state && e.state.screen;
+  if (screen === 'screen-sel') volverSel();
+  else if (screen === 'screen-rend') volverRend();
+  else if (screen === 'screen-resumen') { showScreen('screen-resumen'); window.scrollTo(0, 0); }
+  // sin estado de la app: se deja salir normalmente (ya no queda pantalla interna a la que volver)
+});
 
 // ============================================================
 // INICIO
