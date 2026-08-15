@@ -399,12 +399,14 @@ function doLogin() {
 
   errorEl.style.display = 'none';
   usuarioActual = u;
+  localStorage.setItem('rendiciones_usuario', key);
   showScreen('screen-loading');
   cargarDatos();
 }
 
 function doLogout() {
   usuarioActual = null;
+  localStorage.removeItem('rendiciones_usuario');
   document.getElementById('login-usuario').value = '';
   document.getElementById('login-pass').value = '';
   showScreen('screen-login');
@@ -1381,6 +1383,14 @@ function volverRend() { showScreen('screen-rend'); window.scrollTo(0, 0); }
 // INICIO
 // ============================================================
 // No llamamos cargarDatos() automáticamente — esperamos el login
+// Salvo que ya haya una sesión guardada de una visita anterior
+(function restaurarSesion() {
+  const key = localStorage.getItem('rendiciones_usuario');
+  if (!key || !USUARIOS[key]) return;
+  usuarioActual = USUARIOS[key];
+  showScreen('screen-loading');
+  cargarDatos();
+})();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
